@@ -15,7 +15,7 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
 @Configuration
-@ConditionalOnProperty(name = "redis.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "app.redis.enabled", havingValue = "true", matchIfMissing = false)
 public class RedisConfig {
 
     @Value("${spring.redis.host}")
