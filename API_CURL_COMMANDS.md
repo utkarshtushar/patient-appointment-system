@@ -30,7 +30,7 @@ curl -X GET "{BASE_URL}/api/test"
 
 ---
 
-## 🔐 Authentication APIs (`/api/auth`)
+## ��� Authentication APIs (`/api/auth`)
 
 ### 3. User Registration (Patient)
 ```bash
@@ -336,5 +336,79 @@ curl -X GET "${BASE_URL}/api/appointments/slots/available?doctorId=1&startDate=2
 # Register and test authentication
 curl -X POST "${BASE_URL}/api/auth/register" \
   -H "Content-Type: application/json" \
-  -d '{"email":"demo@example.com","password":"demo123","firstName":"Demo","lastName":"User","role":"PATIENT"}'
+  -d '{"email":"demo@example.com","password":"demo123","firstName":"Demo","lastName":"User","phoneNumber":"+1234567890","role":"PATIENT"}'
+
+# Login and get JWT token
+curl -X POST "${BASE_URL}/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"demo@example.com","password":"demo123"}'
+```
+
+---
+
+## 🚀 Complete Git & Heroku Deployment Commands
+
+### **Step 1: Initialize Git (if not already done)**
+```bash
+cd "C:\Utkarsh\Personal\appointmentSystem"
+git init
+git branch -M main
+```
+
+### **Step 2: Add Remote Repository (Optional - if you want to push to GitHub)**
+```bash
+# Replace 'utkarshtushar' with your GitHub username
+git remote add origin https://github.com/utkarshtushar/patient-appointment-system.git
+```
+
+### **Step 3: Commit All Changes**
+```bash
+# Add all files to staging
+git add .
+
+# Commit with descriptive message
+git commit -m "Production ready: Complete API documentation, Heroku config, and free tier optimization
+
+# Push to GitHub (optional)
+git push -u origin main --force
+```
+
+### **Step 4: Deploy to Heroku**
+```bash
+# Login to Heroku
+heroku login
+
+# Create Heroku app (replace with your preferred name)
+heroku create utkarsh-appointment-system
+
+# Add free PostgreSQL database
+heroku addons:create heroku-postgresql:mini
+
+# Set required environment variables
+heroku config:set SPRING_PROFILES_ACTIVE=heroku
+heroku config:set JWT_SECRET=MySecureJWTSecretKey123456789012345678901234567890
+
+# Add Heroku remote
+heroku git:remote -a utkarsh-appointment-system
+
+# Deploy to Heroku
+git push heroku main
+
+# Scale web dyno to 1
+heroku ps:scale web=1
+
+# Open your live application
+heroku open
+```
+
+### **Step 5: Verify Deployment**
+```bash
+# Check if app is running
+heroku ps --app utkarsh-appointment-system
+
+# View logs
+heroku logs --tail --app utkarsh-appointment-system
+
+# Test your live API
+curl -X GET "https://utkarsh-appointment-system.herokuapp.com/actuator/health"
 ```
