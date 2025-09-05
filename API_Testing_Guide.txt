@@ -1,0 +1,321 @@
+# Patient Appointment System - Complete API Testing Guide
+# =======================================================
+
+# Prerequisites:
+# - Spring Boot application running on http://localhost:8080
+# - H2 database initialized
+# - All endpoints properly configured
+
+# =======================================================
+# 1. BASIC CONNECTIVITY TESTS
+# =======================================================
+
+# Test if application is running
+curl http://localhost:8080/
+
+# Test API endpoints are working
+curl http://localhost:8080/api/test
+
+# =======================================================
+# 2. USER REGISTRATION
+# =======================================================
+
+# Register a Doctor
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Dr. John",
+    "lastName": "Smith",
+    "email": "doctor@example.com",
+    "password": "password123",
+    "role": "DOCTOR",
+    "specialization": "Cardiology",
+    "licenseNumber": "DOC123456",
+    "phoneNumber": "+1234567890"
+  }'
+
+# Register a Patient
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "patient@example.com",
+    "password": "password123",
+    "role": "PATIENT",
+    "phoneNumber": "+1987654321"
+  }'
+
+# Register an Admin
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Admin",
+    "lastName": "User",
+    "email": "admin@example.com",
+    "password": "password123",
+    "role": "ADMIN",
+    "phoneNumber": "+1122334455"
+  }'
+
+# Register Another Doctor (For testing multiple doctors)
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Dr. Sarah",
+    "lastName": "Johnson",
+    "email": "doctor2@example.com",
+    "password": "password123",
+    "role": "DOCTOR",
+    "specialization": "Dermatology",
+    "licenseNumber": "DOC789012",
+    "phoneNumber": "+1555666777"
+  }'
+
+# Register Another Patient
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Mike",
+    "lastName": "Wilson",
+    "email": "patient2@example.com",
+    "password": "password123",
+    "role": "PATIENT",
+    "phoneNumber": "+1777888999"
+  }'
+
+# =======================================================
+# 3. USER LOGIN (Get JWT Tokens)
+# =======================================================
+
+# Login as Doctor (Save the JWT token)
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "doctor@example.com",
+    "password": "password123"
+  }'
+# Expected response: {"token":"eyJ...", "type":"Bearer", "user":{...}}
+# Save this token as DOCTOR_TOKEN
+
+# Login as Patient (Save the JWT token)
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "patient@example.com",
+    "password": "password123"
+  }'
+# Expected response: {"token":"eyJ...", "type":"Bearer", "user":{...}}
+# Save this token as PATIENT_TOKEN
+
+# Login as Admin (Save the JWT token)
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@example.com",
+    "password": "password123"
+  }'
+# Expected response: {"token":"eyJ...", "type":"Bearer", "user":{...}}
+# Save this token as ADMIN_TOKEN
+
+# =======================================================
+# 4. DATABASE SETUP (Via H2 Console)
+# =======================================================
+
+# Access H2 Console: http://localhost:8080/h2-console
+# Connection Details:
+# - JDBC URL: jdbc:h2:mem:appointment_system
+# - Username: sa
+# - Password: (leave empty)
+
+# SQL Commands to run in H2 Console:
+
+# Check all registered users
+# SELECT * FROM users;
+
+# Create Doctor Schedules
+# INSERT INTO doctor_schedules (doctor_id, day_of_week, start_time, end_time, slot_duration_minutes, is_active, created_at, updated_at)
+# VALUES (1, 'MONDAY', '09:00:00', '17:00:00', 30, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+# INSERT INTO doctor_schedules (doctor_id, day_of_week, start_time, end_time, slot_duration_minutes, is_active, created_at, updated_at)
+# VALUES (1, 'TUESDAY', '09:00:00', '17:00:00', 30, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+# INSERT INTO doctor_schedules (doctor_id, day_of_week, start_time, end_time, slot_duration_minutes, is_active, created_at, updated_at)
+# VALUES (1, 'WEDNESDAY', '09:00:00', '17:00:00', 30, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+# Create Appointment Slots for Testing
+# INSERT INTO appointment_slots (doctor_id, slot_date_time, is_booked, is_available, created_at, updated_at)
+# VALUES (1, '2025-09-08 10:00:00', false, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+# INSERT INTO appointment_slots (doctor_id, slot_date_time, is_booked, is_available, created_at, updated_at)
+# VALUES (1, '2025-09-08 10:30:00', false, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+# INSERT INTO appointment_slots (doctor_id, slot_date_time, is_booked, is_available, created_at, updated_at)
+# VALUES (1, '2025-09-08 11:00:00', false, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+# INSERT INTO appointment_slots (doctor_id, slot_date_time, is_booked, is_available, created_at, updated_at)
+# VALUES (1, '2025-09-08 14:00:00', false, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+# INSERT INTO appointment_slots (doctor_id, slot_date_time, is_booked, is_available, created_at, updated_at)
+# VALUES (1, '2025-09-08 14:30:00', false, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+# =======================================================
+# 5. VIEW AVAILABLE APPOINTMENT SLOTS
+# =======================================================
+
+# View available slots for doctor (No authentication required)
+curl -X GET "http://localhost:8080/api/appointments/slots/available?doctorId=1&startDate=2025-09-08&endDate=2025-09-08"
+
+# View available slots for a date range
+curl -X GET "http://localhost:8080/api/appointments/slots/available?doctorId=1&startDate=2025-09-08&endDate=2025-09-15"
+
+# =======================================================
+# 6. APPOINTMENT BOOKING
+# =======================================================
+
+# Book appointment as Patient (Replace YOUR_PATIENT_TOKEN with actual token)
+curl -X POST http://localhost:8080/api/appointments/book \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_PATIENT_TOKEN" \
+  -d '{
+    "slotId": 1,
+    "patientNotes": "Regular checkup - experiencing mild chest discomfort for past few days"
+  }'
+
+# Book another appointment (different slot)
+curl -X POST http://localhost:8080/api/appointments/book \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_PATIENT_TOKEN" \
+  -d '{
+    "slotId": 2,
+    "patientNotes": "Follow-up appointment for previous consultation"
+  }'
+
+# Book appointment with minimal info
+curl -X POST http://localhost:8080/api/appointments/book \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_PATIENT_TOKEN" \
+  -d '{
+    "slotId": 3
+  }'
+
+# =======================================================
+# 7. VIEW APPOINTMENTS
+# =======================================================
+
+# View Patient's Appointments
+curl -X GET http://localhost:8080/api/appointments/patient/my-appointments \
+  -H "Authorization: Bearer YOUR_PATIENT_TOKEN"
+
+# View Doctor's Appointments
+curl -X GET http://localhost:8080/api/appointments/doctor/my-appointments \
+  -H "Authorization: Bearer YOUR_DOCTOR_TOKEN"
+
+# View specific appointment by ID
+curl -X GET http://localhost:8080/api/appointments/1 \
+  -H "Authorization: Bearer YOUR_PATIENT_TOKEN"
+
+# =======================================================
+# 8. APPOINTMENT MANAGEMENT
+# =======================================================
+
+# Cancel an appointment
+curl -X PUT http://localhost:8080/api/appointments/1/cancel \
+  -H "Authorization: Bearer YOUR_PATIENT_TOKEN"
+
+# =======================================================
+# 9. TESTING ERROR SCENARIOS
+# =======================================================
+
+# Try to book an already booked slot (should fail)
+curl -X POST http://localhost:8080/api/appointments/book \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_PATIENT_TOKEN" \
+  -d '{
+    "slotId": 1,
+    "patientNotes": "This should fail if slot 1 is already booked"
+  }'
+
+# Try to book without authentication (should fail)
+curl -X POST http://localhost:8080/api/appointments/book \
+  -H "Content-Type: application/json" \
+  -d '{
+    "slotId": 4,
+    "patientNotes": "This should fail - no auth token"
+  }'
+
+# Try to access doctor appointments as patient (should fail)
+curl -X GET http://localhost:8080/api/appointments/doctor/my-appointments \
+  -H "Authorization: Bearer YOUR_PATIENT_TOKEN"
+
+# =======================================================
+# 10. DATABASE VERIFICATION QUERIES
+# =======================================================
+
+# Run these in H2 Console after testing:
+
+# Check all users
+# SELECT * FROM users;
+
+# Check all doctor schedules
+# SELECT * FROM doctor_schedules;
+
+# Check all appointment slots
+# SELECT * FROM appointment_slots;
+
+# Check all appointments
+# SELECT a.*, u1.first_name as patient_name, u2.first_name as doctor_name
+# FROM appointments a
+# JOIN users u1 ON a.patient_id = u1.id
+# JOIN users u2 ON a.doctor_id = u2.id;
+
+# Check notification queue
+# SELECT * FROM notification_queue;
+
+# Check booked vs available slots
+# SELECT
+#   COUNT(*) as total_slots,
+#   SUM(CASE WHEN is_booked = true THEN 1 ELSE 0 END) as booked_slots,
+#   SUM(CASE WHEN is_booked = false THEN 1 ELSE 0 END) as available_slots
+# FROM appointment_slots;
+
+# =======================================================
+# 11. COMPLETE TEST WORKFLOW
+# =======================================================
+
+# Step-by-step complete test:
+# 1. Register doctor and patient (see section 2)
+# 2. Login both users and save JWT tokens (see section 3)
+# 3. Create schedules and slots via H2 console (see section 4)
+# 4. View available slots (see section 5)
+# 5. Book appointments (see section 6)
+# 6. View appointments (see section 7)
+# 7. Verify in database (see section 10)
+
+# =======================================================
+# 12. NOTES AND TIPS
+# =======================================================
+
+# Important Notes:
+# - Replace YOUR_PATIENT_TOKEN, YOUR_DOCTOR_TOKEN with actual JWT tokens from login responses
+# - JWT tokens are valid for 24 hours (86400000 ms)
+# - Slot IDs start from 1 and increment
+# - Doctor IDs start from 1 (first registered doctor)
+# - Date format: YYYY-MM-DD
+# - DateTime format: YYYY-MM-DD HH:MM:SS
+
+# Common HTTP Status Codes:
+# - 200: Success
+# - 400: Bad Request (invalid JSON or missing fields)
+# - 401: Unauthorized (missing or invalid JWT token)
+# - 403: Forbidden (insufficient permissions)
+# - 409: Conflict (slot already booked)
+# - 500: Internal Server Error
+
+# Token Usage:
+# - Include "Bearer " before the actual token
+# - Token format: "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# =======================================================
+# END OF API TESTING GUIDE
+# =======================================================
