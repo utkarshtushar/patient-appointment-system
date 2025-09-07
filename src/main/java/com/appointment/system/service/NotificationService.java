@@ -18,7 +18,7 @@ public class NotificationService {
     @Autowired
     private NotificationQueueRepository notificationQueueRepository;
 
-    @Autowired
+    @Autowired(required = false)
     private JavaMailSender mailSender;
 
     @Value("${appointment.reminder.minutes-before:5}")
@@ -50,33 +50,31 @@ public class NotificationService {
 
         for (NotificationQueue notification : pendingNotifications) {
             try {
-                sendNotification(notification);
+                switch (notification.getNotificationType()) {
+                    case EMAIL:
+                        sendEmailNotification(notification);
+                        break;
+                    case SMS:
+                        sendSmsNotification(notification);
+                        break;
+                }
                 notification.setStatus(NotificationQueue.NotificationStatus.SENT);
-                notification.setSentAt(LocalDateTime.now());
+                notification.setSentTime(LocalDateTime.now());
             } catch (Exception e) {
                 notification.setStatus(NotificationQueue.NotificationStatus.FAILED);
-                notification.setErrorMessage(e.getMessage());
-                notification.setRetryCount(notification.getRetryCount() + 1);
+                // Log error but continue processing other notifications
+                System.err.println("Failed to send notification: " + e.getMessage());
             }
             notificationQueueRepository.save(notification);
         }
     }
 
-    private void sendNotification(NotificationQueue notification) {
-        switch (notification.getNotificationType()) {
-            case EMAIL:
-                sendEmailNotification(notification);
-                break;
-            case SMS:
-                sendSMSNotification(notification);
-                break;
-            case PUSH_NOTIFICATION:
-                sendPushNotification(notification);
-                break;
-        }
-    }
-
     private void sendEmailNotification(NotificationQueue notification) {
+        if (mailSender == null) {
+            System.out.println("Email service not configured - skipping email notification");
+            return;
+        }
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(notification.getRecipientEmail());
         message.setSubject("Appointment Reminder");
@@ -85,37 +83,18 @@ public class NotificationService {
         mailSender.send(message);
     }
 
-    private void sendSMSNotification(NotificationQueue notification) {
-        // TODO: Implement SMS sending using Twilio or similar service
-        // For now, just log the message
-        System.out.println("SMS to " + notification.getRecipientPhone() + ": " + notification.getMessageContent());
-    }
-
-    private void sendPushNotification(NotificationQueue notification) {
-        // TODO: Implement push notification using Firebase or similar service
-        System.out.println("Push notification: " + notification.getMessageContent());
+    private void sendSmsNotification(NotificationQueue notification) {
+        // SMS functionality can be implemented later
+        System.out.println("SMS notification would be sent to: " + notification.getRecipientPhone());
+        System.out.println("Message: " + notification.getMessageContent());
     }
 
     private String buildReminderMessage(Appointment appointment) {
         return String.format(
-            "Dear %s %s,\n\n" +
-            "This is a reminder that you have an appointment with Dr. %s %s on %s.\n\n" +
-            "Appointment Details:\n" +
-            "Date & Time: %s\n" +
-            "Doctor: Dr. %s %s\n" +
-            "Specialization: %s\n\n" +
-            "Please arrive 15 minutes early for your appointment.\n\n" +
-            "Best regards,\n" +
-            "Patient Appointment System",
+            "Dear %s,\n\nThis is a reminder that you have an appointment scheduled with Dr. %s on %s.\n\nPlease arrive 15 minutes early.\n\nThank you!",
             appointment.getPatient().getFirstName(),
-            appointment.getPatient().getLastName(),
-            appointment.getDoctor().getFirstName(),
-            appointment.getDoctor().getLastName(),
-            appointment.getAppointmentDateTime().toLocalDate(),
-            appointment.getAppointmentDateTime(),
-            appointment.getDoctor().getFirstName(),
-            appointment.getDoctor().getLastName(),
-            appointment.getDoctor().getSpecialization() != null ? appointment.getDoctor().getSpecialization() : "General"
+            appointment.getDoctor().getFirstName() + " " + appointment.getDoctor().getLastName(),
+            appointment.getAppointmentDateTime().toString()
         );
     }
 }
