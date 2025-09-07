@@ -1,273 +1,341 @@
-# Production API Testing Guide - Patient Appointment System
+# Patient Appointment System - API Testing Guide for Render.com
 
-## 🚀 Production Environment
-- **Base URL**: https://utkarsh-appointment-system.herokuapp.com
-- **Database**: PostgreSQL (Heroku Postgres)
-- **Architecture**: Spring Boot microservices (Redis/RabbitMQ disabled for free tier)
+## Deployment Information
+- **Platform**: Render.com (Free Tier)
+- **Database**: H2 File-based Database (Persistent)
+- **External Services**: Disabled (Redis, RabbitMQ) for free deployment
+- **Production URL**: https://your-app-name.onrender.com
 
-## 🔍 Pre-Deployment Testing Checklist
+## Pre-Testing Setup
 
-### Core Functionality Tests
-✅ User registration and authentication
-✅ JWT token generation and validation
-✅ Role-based access control (Patient/Doctor/Admin)
-✅ Appointment slot generation and booking
-✅ Database persistence with PostgreSQL
-✅ Health monitoring endpoints
-✅ CORS and security headers
-
-### Production-Ready Features
-✅ Graceful Redis/RabbitMQ fallbacks
-✅ Database connection pooling
-✅ Error handling and logging
-✅ Environment-based configuration
-✅ Free tier optimization
-
----
-
-## 🧪 Complete Testing Workflow
-
-### Phase 1: Health Check
-```bash
-# Test 1: Application Health
-curl -X GET "https://utkarsh-appointment-system.herokuapp.com/actuator/health"
-# Expected: {"status":"UP","components":{"db":{"status":"UP"}}}
-
-# Test 2: Basic connectivity
-curl -X GET "https://utkarsh-appointment-system.herokuapp.com/api/test"
-# Expected: "Hello from Patient Appointment System!"
+### 1. Environment Variables
+Replace `{BASE_URL}` with your actual Render.com URL:
+```
+BASE_URL=https://your-app-name.onrender.com
 ```
 
-### Phase 2: User Registration & Authentication
-```bash
-# Test 3: Register Patient
-curl -X POST "https://utkarsh-appointment-system.herokuapp.com/api/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "testpatient@example.com",
-    "password": "test123",
-    "firstName": "Test",
-    "lastName": "Patient",
-    "phoneNumber": "+1234567890",
-    "role": "PATIENT"
-  }'
-# Expected: User registration success response
-
-# Test 4: Register Doctor
-curl -X POST "https://utkarsh-appointment-system.herokuapp.com/api/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "testdoctor@example.com",
-    "password": "test123",
-    "firstName": "Dr. Test",
-    "lastName": "Doctor",
-    "phoneNumber": "+1234567891",
-    "role": "DOCTOR",
-    "specialization": "General Medicine"
-  }'
-# Expected: Doctor registration success response
-
-# Test 5: Patient Login
-curl -X POST "https://utkarsh-appointment-system.herokuapp.com/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "testpatient@example.com",
-    "password": "test123"
-  }'
-# Expected: JWT token in response - SAVE THIS TOKEN!
-
-# Test 6: Doctor Login
-curl -X POST "https://utkarsh-appointment-system.herokuapp.com/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "testdoctor@example.com",
-    "password": "test123"
-  }'
-# Expected: JWT token in response - SAVE THIS TOKEN!
+### 2. Required Headers for Testing
+```
+Content-Type: application/json
+Authorization: Bearer {JWT_TOKEN}  # For authenticated endpoints
 ```
 
-### Phase 3: Appointment System Tests
+## Testing Workflow
+
+### Phase 1: Basic Connectivity Tests
+
+1. **Test Home Page**
+   ```bash
+   curl -X GET "{BASE_URL}/"
+   ```
+   Expected: "Patient Appointment System is running successfully!"
+
+2. **Test Health Check**
+   ```bash
+   curl -X GET "{BASE_URL}/actuator/health"
+   ```
+   Expected: {"status":"UP","components":{"db":{"status":"UP"}}}
+
+3. **Test API Endpoint**
+   ```bash
+   curl -X GET "{BASE_URL}/api/test"
+   ```
+   Expected: "API endpoints are working!"
+
+### Phase 2: Authentication Testing
+
+4. **Register Patient User**
+   ```bash
+   curl -X POST "{BASE_URL}/api/auth/register" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "test.patient@example.com",
+       "password": "test123",
+       "firstName": "Test",
+       "lastName": "Patient",
+       "phoneNumber": "+1234567890",
+       "role": "PATIENT"
+     }'
+   ```
+
+5. **Register Doctor User**
+   ```bash
+   curl -X POST "{BASE_URL}/api/auth/register" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "test.doctor@example.com",
+       "password": "test123",
+       "firstName": "Dr. Test",
+       "lastName": "Doctor",
+       "phoneNumber": "+1234567891",
+       "role": "DOCTOR",
+       "specialization": "General Medicine"
+     }'
+   ```
+
+6. **Login as Patient**
+   ```bash
+   curl -X POST "{BASE_URL}/api/auth/login" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "test.patient@example.com",
+       "password": "test123"
+     }'
+   ```
+   Save the JWT token from response for next tests.
+
+7. **Login as Doctor**
+   ```bash
+   curl -X POST "{BASE_URL}/api/auth/login" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "test.doctor@example.com",
+       "password": "test123"
+     }'
+   ```
+
+### Phase 3: Appointment System Testing
+
+8. **Get Available Slots (Public)**
+   ```bash
+   curl -X GET "{BASE_URL}/api/appointments/slots/available?doctorId=2&startDate=2025-09-08&endDate=2025-09-15" \
+     -H "Content-Type: application/json"
+   ```
+
+9. **Book Appointment (Patient Auth Required)**
+   ```bash
+   curl -X POST "{BASE_URL}/api/appointments/book" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer {PATIENT_JWT_TOKEN}" \
+     -d '{
+       "slotId": 1,
+       "patientNotes": "Regular health checkup"
+     }'
+   ```
+
+10. **Get Patient Appointments**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/patient/my-appointments" \
+      -H "Authorization: Bearer {PATIENT_JWT_TOKEN}"
+    ```
+
+11. **Get Doctor Appointments**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/doctor/my-appointments" \
+      -H "Authorization: Bearer {DOCTOR_JWT_TOKEN}"
+    ```
+
+12. **Cancel Appointment**
+    ```bash
+    curl -X PUT "{BASE_URL}/api/appointments/{appointmentId}/cancel" \
+      -H "Authorization: Bearer {PATIENT_JWT_TOKEN}"
+    ```
+
+### Phase 4: Error Testing
+
+13. **Test Unauthorized Access**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/patient/my-appointments"
+    ```
+    Expected: 401 Unauthorized
+
+14. **Test Invalid Login**
+    ```bash
+    curl -X POST "{BASE_URL}/api/auth/login" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "email": "invalid@example.com",
+        "password": "wrongpassword"
+      }'
+    ```
+    Expected: 401 Unauthorized
+
+15. **Test Duplicate Registration**
+    ```bash
+    curl -X POST "{BASE_URL}/api/auth/register" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "email": "test.patient@example.com",
+        "password": "test123",
+        "firstName": "Duplicate",
+        "lastName": "User",
+        "phoneNumber": "+1234567892",
+        "role": "PATIENT"
+      }'
+    ```
+    Expected: 400 Bad Request (Email already exists)
+
+## Production Verification Checklist
+
+### ✅ Basic Functionality
+- [ ] Application starts successfully
+- [ ] Health check returns UP status
+- [ ] Database connection is working
+- [ ] Home page loads correctly
+
+### ✅ Authentication System
+- [ ] User registration works for all roles (PATIENT, DOCTOR, ADMIN)
+- [ ] User login returns valid JWT token
+- [ ] JWT token validation works
+- [ ] Role-based access control is enforced
+
+### ✅ Appointment System
+- [ ] Available slots can be retrieved without authentication
+- [ ] Patients can book appointments with valid JWT token
+- [ ] Doctors can view their appointments
+- [ ] Patients can view their appointments
+- [ ] Appointments can be cancelled
+
+### ✅ Security Features
+- [ ] Unauthorized requests are rejected (401)
+- [ ] Invalid JWT tokens are rejected
+- [ ] Role restrictions are enforced
+- [ ] Sensitive endpoints require authentication
+
+### ✅ Error Handling
+- [ ] Invalid requests return appropriate error codes
+- [ ] Duplicate registrations are prevented
+- [ ] Database constraints are enforced
+- [ ] Error messages are informative but not revealing
+
+## Common Issues and Solutions
+
+### Issue 1: 503 Service Unavailable
+**Cause**: Render.com free tier service is sleeping
+**Solution**: Wait 30-60 seconds for service to wake up, then retry
+
+### Issue 2: Database Connection Errors
+**Cause**: H2 database file not accessible
+**Solution**: Check if data directory exists and has write permissions
+
+### Issue 3: JWT Token Expired
+**Cause**: Token has 24-hour expiration
+**Solution**: Login again to get a new token
+
+### Issue 4: CORS Errors (if accessing from browser)
+**Cause**: Cross-origin requests blocked
+**Solution**: Use server-side requests or configure CORS in application
+
+## Performance Testing
+
+### Load Testing Commands
 ```bash
-# Test 7: Get Available Slots (Public endpoint - no auth)
-curl -X GET "https://utkarsh-appointment-system.herokuapp.com/api/appointments/slots/available?doctorId=1&startDate=2025-09-06&endDate=2025-09-13" \
-  -H "Content-Type: application/json"
-# Expected: List of available appointment slots
+# Test concurrent registrations
+for i in {1..10}; do
+  curl -X POST "{BASE_URL}/api/auth/register" \
+    -H "Content-Type: application/json" \
+    -d "{\"email\":\"user$i@example.com\",\"password\":\"test123\",\"firstName\":\"User$i\",\"lastName\":\"Test\",\"phoneNumber\":\"+123456789$i\",\"role\":\"PATIENT\"}" &
+done
+wait
 
-# Test 8: Book Appointment (Patient auth required)
-curl -X POST "https://utkarsh-appointment-system.herokuapp.com/api/appointments/book" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer [PATIENT_JWT_TOKEN]" \
-  -d '{
-    "slotId": 1,
-    "patientNotes": "Regular checkup"
-  }'
-# Expected: Appointment booking confirmation
-
-# Test 9: View Patient Appointments
-curl -X GET "https://utkarsh-appointment-system.herokuapp.com/api/appointments/patient/my-appointments" \
-  -H "Authorization: Bearer [PATIENT_JWT_TOKEN]"
-# Expected: List of patient's appointments
-
-# Test 10: View Doctor Appointments
-curl -X GET "https://utkarsh-appointment-system.herokuapp.com/api/appointments/doctor/my-appointments" \
-  -H "Authorization: Bearer [DOCTOR_JWT_TOKEN]"
-# Expected: List of doctor's appointments
+# Test concurrent logins
+for i in {1..10}; do
+  curl -X POST "{BASE_URL}/api/auth/login" \
+    -H "Content-Type: application/json" \
+    -d "{\"email\":\"user$i@example.com\",\"password\":\"test123\"}" &
+done
+wait
 ```
 
-### Phase 4: Security & Access Control Tests
+## Monitoring and Logs
+
+### Check Application Status
 ```bash
-# Test 11: Unauthorized access (should fail)
-curl -X GET "https://utkarsh-appointment-system.herokuapp.com/api/appointments/patient/my-appointments"
-# Expected: 401 Unauthorized
+# Health check
+curl -X GET "{BASE_URL}/actuator/health"
 
-# Test 12: Wrong role access (should fail)
-curl -X GET "https://utkarsh-appointment-system.herokuapp.com/api/admin/users" \
-  -H "Authorization: Bearer [PATIENT_JWT_TOKEN]"
-# Expected: 403 Forbidden
+# Application info
+curl -X GET "{BASE_URL}/actuator/info"
 
-# Test 13: Expired token handling
-# (Use an old/invalid token)
-curl -X GET "https://utkarsh-appointment-system.herokuapp.com/api/appointments/patient/my-appointments" \
-  -H "Authorization: Bearer invalid_token_here"
-# Expected: 401 Unauthorized
+# Metrics (if enabled)
+curl -X GET "{BASE_URL}/actuator/metrics"
 ```
 
----
-
-## 📊 Expected Performance Metrics
-
-### Response Times (Production)
-- Health check: < 2 seconds
-- Authentication: < 3 seconds
-- Available slots: < 5 seconds
-- Book appointment: < 5 seconds
-- Database queries: < 2 seconds
-
-### Database Performance
-- Connection pool: HikariCP optimized
-- Query optimization: Indexed on doctor_id, slot_date
-- Migration: Auto-applied via Hibernate DDL
-
----
-
-## 🚨 Error Scenarios & Handling
-
-### Test Error Conditions
+### Render.com Specific Commands
 ```bash
-# Test 14: Duplicate email registration
-curl -X POST "https://utkarsh-appointment-system.herokuapp.com/api/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "testpatient@example.com",
-    "password": "test123",
-    "firstName": "Duplicate",
-    "lastName": "User",
-    "role": "PATIENT"
-  }'
-# Expected: 400 Bad Request - Email already exists
+# View application logs (if using Render CLI)
+render logs -f your-app-name
 
-# Test 15: Invalid login credentials
-curl -X POST "https://utkarsh-appointment-system.herokuapp.com/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "testpatient@example.com",
-    "password": "wrongpassword"
-  }'
-# Expected: 401 Unauthorized
+# Check service status
+render services list
 
-# Test 16: Book unavailable slot
-curl -X POST "https://utkarsh-appointment-system.herokuapp.com/api/appointments/book" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer [PATIENT_JWT_TOKEN]" \
-  -d '{
-    "slotId": 999999,
-    "patientNotes": "Test booking"
-  }'
-# Expected: 400 Bad Request - Slot not found or unavailable
+# View deployment history
+render deploys list your-app-name
 ```
 
----
+## Final Production Test Script
 
-## 🔧 Production Verification Checklist
-
-### ✅ Infrastructure
-- [x] Heroku dyno running
-- [x] PostgreSQL database connected
-- [x] Environment variables set
-- [x] HTTPS enabled
-- [x] Health monitoring active
-
-### ✅ Security
-- [x] JWT authentication working
-- [x] Role-based access control
-- [x] CORS properly configured
-- [x] Security headers enabled
-- [x] Sensitive data encrypted
-
-### ✅ Core Features
-- [x] User registration/login
-- [x] Appointment booking
-- [x] Slot availability check
-- [x] Database persistence
-- [x] Error handling
-
-### ✅ Free Tier Optimizations
-- [x] Redis disabled (in-memory fallback)
-- [x] RabbitMQ disabled (sync processing)
-- [x] Connection pooling optimized
-- [x] Database queries efficient
-
----
-
-## 📈 Monitoring & Alerts
-
-### Key Metrics to Monitor
-- Application uptime
-- Response times
-- Database connection health
-- Error rates
-- Memory usage
-
-### Heroku Monitoring Commands
 ```bash
-# Check application logs
-heroku logs --tail --app utkarsh-appointment-system
+#!/bin/bash
+# Complete production test script for Render.com
 
-# Check dyno status
-heroku ps --app utkarsh-appointment-system
+BASE_URL="https://your-app-name.onrender.com"
 
-# Monitor database
-heroku pg:info --app utkarsh-appointment-system
+echo "🚀 Starting production tests for Patient Appointment System on Render.com"
+
+# Test 1: Basic connectivity
+echo "📡 Testing basic connectivity..."
+curl -X GET "$BASE_URL/" || echo "❌ Home page failed"
+curl -X GET "$BASE_URL/actuator/health" || echo "❌ Health check failed"
+
+# Test 2: User registration
+echo "👤 Testing user registration..."
+curl -X POST "$BASE_URL/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"prod.test@example.com","password":"test123","firstName":"Prod","lastName":"Test","phoneNumber":"+1234567890","role":"PATIENT"}' \
+  || echo "❌ Patient registration failed"
+
+# Test 3: User login
+echo "🔐 Testing user login..."
+RESPONSE=$(curl -s -X POST "$BASE_URL/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"prod.test@example.com","password":"test123"}')
+
+TOKEN=$(echo $RESPONSE | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+
+if [ -n "$TOKEN" ]; then
+  echo "✅ Login successful, token received"
+
+  # Test 4: Protected endpoint
+  echo "🛡️ Testing protected endpoint..."
+  curl -X GET "$BASE_URL/api/appointments/patient/my-appointments" \
+    -H "Authorization: Bearer $TOKEN" || echo "❌ Protected endpoint failed"
+else
+  echo "❌ Login failed, no token received"
+fi
+
+echo "🎉 Production tests completed!"
 ```
 
----
+## Render.com Deployment Steps
 
-## 🎯 Success Criteria
+1. **Connect GitHub Repository**
+   - Go to Render.com dashboard
+   - Click "New +" -> "Web Service"
+   - Connect your GitHub repository
+   - Select branch: main
 
-### All Tests Must Pass:
-1. ✅ Health endpoint returns UP status
-2. ✅ User registration works for all roles
-3. ✅ JWT authentication successful
-4. ✅ Available slots API accessible without auth
-5. ✅ Appointment booking works with valid token
-6. ✅ Role-based access properly enforced
-7. ✅ Database operations persist correctly
-8. ✅ Error handling graceful and informative
+2. **Configure Build Settings**
+   - Build Command: `./mvnw clean package -DskipTests`
+   - Start Command: `java -jar target/patient-appointment-system-1.0.0.jar`
 
-### Performance Benchmarks:
-- 🚀 First request (cold start): < 15 seconds
-- ⚡ Subsequent requests: < 5 seconds
-- 💾 Database operations: < 2 seconds
-- 🔒 Authentication: < 3 seconds
+3. **Set Environment Variables**
+   - `SPRING_PROFILES_ACTIVE`: `production`
+   - `JWT_SECRET`: `your-secure-jwt-secret-key`
+   - `PORT`: `8080` (auto-set by Render)
 
----
+4. **Deploy and Monitor**
+   - Click "Create Web Service"
+   - Monitor build logs
+   - Test endpoints once deployment is complete
 
-## 📞 Production Support
+## Success Criteria
 
-### If Tests Fail:
-1. Check Heroku logs: `heroku logs --tail`
-2. Verify environment variables: `heroku config`
-3. Check database connectivity: `heroku pg:info`
-4. Restart if needed: `heroku restart`
-
-Your appointment system is now production-ready with comprehensive testing coverage!
+✅ **Deployment Successful** if all these tests pass:
+- Health check returns {"status":"UP"}
+- User can register and login
+- JWT token is generated and validated
+- Patient can book appointments
+- Doctor can view appointments
+- All API endpoints respond correctly
+- No 500 errors in normal operations

@@ -5,6 +5,7 @@
 - **Local Development**: `http://localhost:8080`
 - **Heroku**: `https://your-app-name.herokuapp.com`
 - **Railway**: `https://your-app-name.up.railway.app`
+- **Render**: `https://your-app-name.onrender.com`
 - **Custom Domain**: `https://your-custom-domain.com`
 
 ### Quick Reference URLs
@@ -216,6 +217,11 @@ export BASE_URL="https://your-heroku-app-name.herokuapp.com"
 export BASE_URL="https://your-railway-app-name.up.railway.app"
 ```
 
+### Render Deployment
+```bash
+export BASE_URL="https://your-app-name.onrender.com"
+```
+
 ### Custom Domain
 ```bash
 export BASE_URL="https://api.yourdomain.com"
@@ -412,3 +418,30 @@ heroku logs --tail --app utkarsh-appointment-system
 # Test your live API
 curl -X GET "https://utkarsh-appointment-system.herokuapp.com/actuator/health"
 ```
+
+### **Step 6: Deploy to Render**
+```bash
+# Login to Render
+render login
+
+# Create a new Web Service
+render create web-service
+
+# Follow prompts to set up your service
+# - Name: utkarsh-appointment-system
+# - Region: Choose closest to you
+# - Branch: main
+# - Root Directory: Leave blank
+
+# Set environment variables
+render env add SPRING_PROFILES_ACTIVE render
+render env add JWT_SECRET MySecureJWTSecretKey123456789012345678901234567890
+
+# Deploy the service
+git push render main
+
+# Open your live application
+render open utkarsh-appointment-system
+```
+
+
