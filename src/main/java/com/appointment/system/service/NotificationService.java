@@ -59,7 +59,7 @@ public class NotificationService {
                         break;
                 }
                 notification.setStatus(NotificationQueue.NotificationStatus.SENT);
-                notification.setSentTime(LocalDateTime.now());
+                notification.setSentAt(LocalDateTime.now()); // Fixed: changed from setSentTime to setSentAt
             } catch (Exception e) {
                 notification.setStatus(NotificationQueue.NotificationStatus.FAILED);
                 // Log error but continue processing other notifications
