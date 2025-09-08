@@ -52,7 +52,7 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
         @Param("startDate") LocalDateTime startDate,
         @Param("endDate") LocalDateTime endDate);
 
-    @Query("SELECT as FROM AppointmentSlot as JOIN as.appointment a WHERE a.patient.id = :patientId AND as.slotDateTime BETWEEN :startDate AND :endDate ORDER BY as.slotDateTime")
+    @Query("SELECT a.appointmentSlot FROM Appointment a WHERE a.patient.id = :patientId AND a.appointmentSlot.slotDateTime BETWEEN :startDate AND :endDate ORDER BY a.appointmentSlot.slotDateTime")
     List<AppointmentSlot> findSlotsByPatientAndDateRange(
         @Param("patientId") Long patientId,
         @Param("startDate") LocalDateTime startDate,
