@@ -2,19 +2,15 @@ package com.appointment.system.controller;
 
 import com.appointment.system.dto.request.BookAppointmentRequest;
 import com.appointment.system.entity.Appointment;
-import com.appointment.system.entity.AppointmentSlot;
 import com.appointment.system.entity.User;
 import com.appointment.system.service.AppointmentService;
-import com.appointment.system.service.SlotGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -24,9 +20,6 @@ public class AppointmentController {
     
     @Autowired
     private AppointmentService appointmentService;
-    
-    @Autowired
-    private SlotGenerationService slotGenerationService;
     
     @PostMapping("/book")
     @PreAuthorize("hasRole('PATIENT')")
@@ -60,15 +53,6 @@ public class AppointmentController {
         User doctor = (User) authentication.getPrincipal();
         List<Appointment> appointments = appointmentService.getDoctorAppointments(doctor.getId());
         return ResponseEntity.ok(appointments);
-    }
-    
-    @GetMapping("/slots/available")
-    public ResponseEntity<List<AppointmentSlot>> getAvailableSlots(
-            @RequestParam Long doctorId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        List<AppointmentSlot> slots = slotGenerationService.getAvailableSlots(doctorId, startDate, endDate);
-        return ResponseEntity.ok(slots);
     }
     
     @PutMapping("/{appointmentId}/cancel")

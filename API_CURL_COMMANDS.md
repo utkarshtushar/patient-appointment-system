@@ -156,7 +156,7 @@ curl -X GET "{BASE_URL}/api/users?role=ADMIN" \
 
 ### 7. Get Available Slots (Public - No Auth)
 ```bash
-curl -X GET "{BASE_URL}/api/appointments/slots/available?doctorId=1&startDate=2025-09-06&endDate=2025-09-13" \
+curl -X GET "{BASE_URL}/api/public/slots/available?doctorId=1&startDate=2025-09-06&endDate=2025-09-13" \
   -H "Content-Type: application/json"
 ```
 **Query Parameters:**
@@ -235,7 +235,7 @@ curl -X GET "{BASE_URL}/actuator/metrics"
 | 2 | GET | `/api/test` | No | Public | API test endpoint |
 | 3 | POST | `/api/auth/register` | No | Public | User registration |
 | 4 | POST | `/api/auth/login` | No | Public | User login |
-| 5 | GET | `/api/appointments/slots/available` | No | Public | Get available appointment slots |
+| 5 | GET | `/api/public/slots/available` | No | Public | Get available appointment slots |
 | 6 | POST | `/api/appointments/book` | Yes | PATIENT | Book an appointment |
 | 7 | GET | `/api/appointments/patient/my-appointments` | Yes | PATIENT | Get patient's appointments |
 | 8 | GET | `/api/appointments/doctor/my-appointments` | Yes | DOCTOR | Get doctor's appointments |
@@ -314,7 +314,7 @@ curl -X POST "{BASE_URL}/api/auth/login" \
 ### Step 3: Test Appointment System
 ```bash
 # Get available slots (no auth needed)
-curl -X GET "{BASE_URL}/api/appointments/slots/available?doctorId=1&startDate=2025-09-06&endDate=2025-09-13"
+curl -X GET "{BASE_URL}/api/public/slots/available?doctorId=1&startDate=2025-09-06&endDate=2025-09-13"
 
 # Book appointment (use patient JWT token)
 curl -X POST "{BASE_URL}/api/appointments/book" \
@@ -385,7 +385,7 @@ BASE_URL="https://your-app-name.herokuapp.com"
 curl -X GET "${BASE_URL}/actuator/health"
 
 # Test public API
-curl -X GET "${BASE_URL}/api/appointments/slots/available?doctorId=1&startDate=2025-09-06&endDate=2025-09-13"
+curl -X GET "${BASE_URL}/api/public/slots/available?doctorId=1&startDate=2025-09-06&endDate=2025-09-13"
 
 # Register and test authentication
 curl -X POST "${BASE_URL}/api/auth/register" \

@@ -184,20 +184,20 @@ curl -X GET "https://appointment-system-utkarsh.onrender.com/api/appointments/sc
 
 ### 16. Get Available Slots (Public - No Auth Required)
 ```bash
-curl -X GET "https://appointment-system-utkarsh.onrender.com/api/appointments/slots/available?doctorId=2&startDate=2025-09-08&endDate=2025-09-15" \
+curl -X GET "https://appointment-system-utkarsh.onrender.com/api/public/slots/available?doctorId=2&startDate=2025-09-08&endDate=2025-09-15" \
   -H "Content-Type: application/json"
 ```
 **Note**: Replace `doctorId=2` with actual doctor ID from your system
 
 ### 17. Get Available Slots with Date Range
 ```bash
-curl -X GET "https://appointment-system-utkarsh.onrender.com/api/appointments/slots/available?doctorId=2&startDate=2025-09-15&endDate=2025-09-22" \
+curl -X GET "https://appointment-system-utkarsh.onrender.com/api/public/slots/available?doctorId=2&startDate=2025-09-15&endDate=2025-09-22" \
   -H "Content-Type: application/json"
 ```
 
 ### 18. Get Available Slots for Different Doctor
 ```bash
-curl -X GET "https://appointment-system-utkarsh.onrender.com/api/appointments/slots/available?doctorId=3&startDate=2025-09-08&endDate=2025-09-15" \
+curl -X GET "https://appointment-system-utkarsh.onrender.com/api/public/slots/available?doctorId=3&startDate=2025-09-08&endDate=2025-09-15" \
   -H "Content-Type: application/json"
 ```
 
@@ -618,7 +618,7 @@ curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/login" \
   -d '{"email":"quicktest@example.com","password":"Quick123!"}'
 
 # 5. Get Available Slots (Replace doctorId with actual ID)
-curl -X GET "https://appointment-system-utkarsh.onrender.com/api/appointments/slots/available?doctorId=1&startDate=2025-09-08&endDate=2025-09-15"
+curl -X GET "https://appointment-system-utkarsh.onrender.com/api/public/slots/available?doctorId=1&startDate=2025-09-08&endDate=2025-09-15"
 ```
 
 ## ✅ Success Criteria

@@ -175,7 +175,7 @@ GET /api/users?role=ADMIN
 ## 📅 Appointment APIs
 
 ### 3. Get Available Slots
-**Endpoint:** `GET /api/appointments/slots/available`  
+**Endpoint:** `GET /api/public/slots/available`  
 **Access:** Public  
 **Description:** Get available appointment slots for a doctor
 
@@ -186,7 +186,7 @@ GET /api/users?role=ADMIN
 
 **Example Request:**
 ```
-GET /api/appointments/slots/available?doctorId=1&startDate=2025-09-10&endDate=2025-09-15
+GET /api/public/slots/available?doctorId=1&startDate=2025-09-10&endDate=2025-09-15
 ```
 
 **Response (200 OK):**
@@ -548,7 +548,7 @@ apiClient.interceptors.request.use(config => {
 
 ### Patient Flow
 1. Register/Login → Get JWT token
-2. Search for available slots → `GET /api/appointments/slots/available`
+2. Search for available slots → `GET /api/public/slots/available`
 3. Book appointment → `POST /api/appointments/book`
 4. View appointments → `GET /api/appointments/patient/my-appointments`
 5. Cancel if needed → `PUT /api/appointments/{id}/cancel`
