@@ -23,7 +23,8 @@ public class PublicController {
             @RequestParam Long doctorId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        return ResponseEntity.ok(slots);
+        List<AppointmentSlot> availableSlots = slotGenerationService.getAvailableSlots(doctorId, startDate, endDate);
+        return ResponseEntity.ok(availableSlots);
     }
 
     @GetMapping("/health")
