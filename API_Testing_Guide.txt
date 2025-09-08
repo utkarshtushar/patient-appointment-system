@@ -96,31 +96,79 @@ Authorization: Bearer {JWT_TOKEN}  # For authenticated endpoints
 
 ### Phase 3: User Management Testing
 
-8. **Get Users by Role (Requires Authentication)**
+8. **Get Users by Role (Requires Authentication with Role Restrictions)**
 
-9. **Get All Doctors**
+**Important**: Access is restricted based on user role:
+- **PATIENTS**: Can only view doctors (`role=DOCTOR`)
+- **DOCTORS**: Can only view their own patients (`role=PATIENT`)
+- **ADMINS**: Can view all roles
+
+9. **Patient Viewing Doctors (Allowed)**
    ```bash
    curl -X GET "{BASE_URL}/api/users?role=DOCTOR" \
-     -H "Authorization: Bearer {JWT_TOKEN}" \
+     -H "Authorization: Bearer {PATIENT_JWT_TOKEN}" \
      -H "Content-Type: application/json"
    ```
    Expected: Array of doctor user objects with specialization and licenseNumber
 
-10. **Get All Patients**
+10. **Patient Viewing Patients (Should Fail)**
     ```bash
     curl -X GET "{BASE_URL}/api/users?role=PATIENT" \
-      -H "Authorization: Bearer {JWT_TOKEN}" \
+      -H "Authorization: Bearer {PATIENT_JWT_TOKEN}" \
       -H "Content-Type: application/json"
     ```
-    Expected: Array of patient user objects
+    Expected: 403 Forbidden
 
-11. **Get All Admins**
+11. **Doctor Viewing Their Patients (Allowed)**
     ```bash
+    curl -X GET "{BASE_URL}/api/users?role=PATIENT" \
+      -H "Authorization: Bearer {DOCTOR_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: Array of patient user objects who have appointments with this doctor
+
+12. **Doctor Viewing Other Doctors (Should Fail)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/users?role=DOCTOR" \
+      -H "Authorization: Bearer {DOCTOR_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: 403 Forbidden
+
+13. **Admin Viewing Any Role (Allowed)**
+    ```bash
+    # View doctors
+    curl -X GET "{BASE_URL}/api/users?role=DOCTOR" \
+      -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+
+    # View patients
+    curl -X GET "{BASE_URL}/api/users?role=PATIENT" \
+      -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+
+    # View admins
     curl -X GET "{BASE_URL}/api/users?role=ADMIN" \
+      -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: Array of user objects for each role
+
+14. **Get All Doctors (Simplified Endpoint)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/doctors" \
       -H "Authorization: Bearer {JWT_TOKEN}" \
       -H "Content-Type: application/json"
     ```
-    Expected: Array of admin user objects
+    Expected: Array of all doctors (PATIENT and ADMIN access)
+
+15. **Get Patients (Simplified Endpoint)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/patients" \
+      -H "Authorization: Bearer {JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: Array of patients (DOCTOR and ADMIN access)
 
 ### Phase 4: Appointment System Testing
 

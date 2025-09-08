@@ -109,29 +109,61 @@ curl -X POST "{BASE_URL}/api/auth/login" \
 
 ### Get Users by Role
 **Endpoint**: `GET /api/users?role={ROLE}`  
-**Authentication**: Required (All roles: PATIENT, DOCTOR, ADMIN)  
-**Description**: Get filtered list of users by role
+**Authentication**: Required (All roles: PATIENT, DOCTOR, ADMIN with restrictions)  
+**Description**: Get filtered list of users by role with role-based restrictions
 
-#### Get All Doctors
+**Access Control:**
+- **PATIENTS**: Can only view doctors (`role=DOCTOR`)
+- **DOCTORS**: Can only view their own patients (`role=PATIENT`) - patients who have appointments with them
+- **ADMINS**: Can view all roles
+
+#### Patient Viewing Doctors (Allowed)
 ```bash
 curl -X GET "{BASE_URL}/api/users?role=DOCTOR" \
-  -H "Authorization: Bearer {JWT_TOKEN}" \
+  -H "Authorization: Bearer {PATIENT_JWT_TOKEN}" \
   -H "Content-Type: application/json"
 ```
 
-#### Get All Patients
+#### Doctor Viewing Their Patients (Allowed)
 ```bash
 curl -X GET "{BASE_URL}/api/users?role=PATIENT" \
-  -H "Authorization: Bearer {JWT_TOKEN}" \
+  -H "Authorization: Bearer {DOCTOR_JWT_TOKEN}" \
   -H "Content-Type: application/json"
 ```
 
-#### Get All Admins
+#### Admin Viewing Any Role (Allowed)
 ```bash
+# View doctors
+curl -X GET "{BASE_URL}/api/users?role=DOCTOR" \
+  -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+
+# View patients
+curl -X GET "{BASE_URL}/api/users?role=PATIENT" \
+  -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+
+# View admins
 curl -X GET "{BASE_URL}/api/users?role=ADMIN" \
+  -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+
+#### Get All Doctors (Simplified Endpoint)
+```bash
+curl -X GET "{BASE_URL}/api/doctors" \
   -H "Authorization: Bearer {JWT_TOKEN}" \
   -H "Content-Type: application/json"
 ```
+**Access**: PATIENT, ADMIN
+
+#### Get Patients (Simplified Endpoint)
+```bash
+curl -X GET "{BASE_URL}/api/patients" \
+  -H "Authorization: Bearer {JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+**Access**: DOCTOR, ADMIN
 
 **Sample Response**:
 ```json

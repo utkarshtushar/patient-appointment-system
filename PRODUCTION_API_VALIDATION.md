@@ -302,52 +302,66 @@ curl -X GET "https://appointment-system-utkarsh.onrender.com/api/users/1" \
 
 ### 30. Get Users by Role
 **Endpoint:** `GET /api/users?role={ROLE}`  
-**Access:** PATIENT, DOCTOR, ADMIN  
+**Access:** PATIENT, DOCTOR, ADMIN (with restrictions)  
 **Authentication:** Required  
-**Description:** Get filtered list of users by role
+**Description:** Get filtered list of users by role with role-based access control
 
-**Query Parameters:**
-- `role` (required): User role (DOCTOR, PATIENT, ADMIN)
+**Access Control:**
+- **PATIENTS**: Can only view doctors (`role=DOCTOR`)
+- **DOCTORS**: Can only view their own patients (`role=PATIENT`) - patients who have appointments with them
+- **ADMINS**: Can view all roles
 
 **Example Requests:**
 ```bash
-# Get all doctors
+# Patient viewing doctors (allowed)
 curl "https://appointment-system-utkarsh.onrender.com/api/users?role=DOCTOR" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer PATIENT_JWT_TOKEN" \
   -H "Content-Type: application/json"
 
-# Get all patients
+# Patient viewing patients (forbidden - returns 403)
 curl "https://appointment-system-utkarsh.onrender.com/api/users?role=PATIENT" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer PATIENT_JWT_TOKEN" \
   -H "Content-Type: application/json"
 
-# Get all admins
+# Doctor viewing their patients (allowed)
+curl "https://appointment-system-utkarsh.onrender.com/api/users?role=PATIENT" \
+  -H "Authorization: Bearer DOCTOR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+
+# Doctor viewing other doctors (forbidden - returns 403)
+curl "https://appointment-system-utkarsh.onrender.com/api/users?role=DOCTOR" \
+  -H "Authorization: Bearer DOCTOR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+
+# Admin viewing any role (allowed)
+curl "https://appointment-system-utkarsh.onrender.com/api/users?role=DOCTOR" \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+
+curl "https://appointment-system-utkarsh.onrender.com/api/users?role=PATIENT" \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+
 curl "https://appointment-system-utkarsh.onrender.com/api/users?role=ADMIN" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN" \
   -H "Content-Type: application/json"
 ```
 
-**Response (200 OK):**
-```json
-{
-  "id": 1,
-  "firstName": "Dr. John",
-  "lastName": "Doe",
-  "email": "doctor@example.com",
-  "phoneNumber": "+1234567890",
-  "role": "DOCTOR",
-  "specialization": "Cardiology",
-  "licenseNumber": "DOC123456",
-  "createdAt": "2025-09-09T12:00:00"
-}
+### 30a. Get All Doctors (Simplified Endpoint)
+```bash
+curl -X GET "https://appointment-system-utkarsh.onrender.com/api/doctors" \
+  -H "Authorization: Bearer JWT_TOKEN" \
+  -H "Content-Type: application/json"
 ```
+**Access:** PATIENT, ADMIN
 
-**Error Response (400 Bad Request):**
-```json
-{
-  "error": "Invalid role parameter"
-}
+### 30b. Get Patients (Simplified Endpoint)
+```bash
+curl -X GET "https://appointment-system-utkarsh.onrender.com/api/patients" \
+  -H "Authorization: Bearer JWT_TOKEN" \
+  -H "Content-Type: application/json"
 ```
+**Access:** DOCTOR, ADMIN
 
 ---
 

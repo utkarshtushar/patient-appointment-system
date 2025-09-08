@@ -109,22 +109,35 @@ Authorization: Bearer <jwt_token>
 
 ### 11. Get Users by Role
 **Endpoint:** `GET /api/users?role={ROLE}`  
-**Access:** PATIENT, DOCTOR, ADMIN  
+**Access:** PATIENT, DOCTOR, ADMIN (with restrictions)  
 **Authentication:** Required  
-**Description:** Get filtered list of users by role
+**Description:** Get filtered list of users by role with role-based restrictions
 
 **Query Parameters:**
 - `role` (required): User role (DOCTOR, PATIENT, ADMIN)
 
+**Access Control:**
+- **PATIENTS**: Can only view doctors (`role=DOCTOR`)
+- **DOCTORS**: Can only view their own patients (`role=PATIENT`) - patients who have appointments with them
+- **ADMINS**: Can view all roles
+
 **Example Requests:**
 ```bash
-# Get all doctors
+# Patient viewing doctors (allowed)
 GET /api/users?role=DOCTOR
 
-# Get all patients
+# Patient viewing patients (forbidden)
+GET /api/users?role=PATIENT  # Returns 403 Forbidden
+
+# Doctor viewing their patients (allowed)
 GET /api/users?role=PATIENT
 
-# Get all admins
+# Doctor viewing other doctors (forbidden)
+GET /api/users?role=DOCTOR  # Returns 403 Forbidden
+
+# Admin viewing any role (allowed)
+GET /api/users?role=DOCTOR
+GET /api/users?role=PATIENT
 GET /api/users?role=ADMIN
 ```
 
@@ -141,33 +154,65 @@ GET /api/users?role=ADMIN
     "specialization": "Cardiology",
     "licenseNumber": "DOC123456",
     "createdAt": "2025-09-09T12:00:00"
-  },
-  {
-    "id": 2,
-    "firstName": "Dr. Jane",
-    "lastName": "Smith",
-    "email": "doctor2@example.com",
-    "phoneNumber": "+1234567891",
-    "role": "DOCTOR",
-    "specialization": "General Medicine",
-    "licenseNumber": "DOC789123",
-    "createdAt": "2025-09-09T12:15:00"
   }
 ]
 ```
 
-**Error Response (400 Bad Request):**
+**Error Response (403 Forbidden):**
 ```json
 {
-  "error": "Invalid role parameter"
+  "error": "Access denied for this role combination"
 }
 ```
 
-**Error Response (401 Unauthorized):**
+### 11a. Get All Doctors
+**Endpoint:** `GET /api/doctors`  
+**Access:** PATIENT, ADMIN  
+**Authentication:** Required  
+**Description:** Get all doctors (simplified endpoint for patients and admins)
+
+**Response (200 OK):**
 ```json
-{
-  "error": "Authentication required"
-}
+[
+  {
+    "id": 1,
+    "firstName": "Dr. John",
+    "lastName": "Doe",
+    "email": "doctor@example.com",
+    "phoneNumber": "+1234567890",
+    "role": "DOCTOR",
+    "specialization": "Cardiology",
+    "licenseNumber": "DOC123456",
+    "createdAt": "2025-09-09T12:00:00"
+  }
+]
+```
+
+### 11b. Get Patients
+**Endpoint:** `GET /api/patients`  
+**Access:** DOCTOR, ADMIN  
+**Authentication:** Required  
+**Description:** Get patients with role-based filtering
+
+**Access Control:**
+- **DOCTORS**: Only see patients who have appointments with them
+- **ADMINS**: See all patients
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 2,
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "patient@example.com",
+    "phoneNumber": "+1234567890",
+    "role": "PATIENT",
+    "specialization": null,
+    "licenseNumber": null,
+    "createdAt": "2025-09-09T12:00:00"
+  }
+]
 ```
 
 ---
@@ -485,6 +530,67 @@ GET /api/appointments/slots/admin?patientId=2&startDate=2025-09-10&endDate=2025-
 }
 ```
 
+### 7. Get Specific Appointment
+**Endpoint:** `GET /api/appointments/{appointmentId}`  
+**Access:** PATIENT, DOCTOR, ADMIN  
+**Authentication:** Required  
+**Description:** Get details of a specific appointment
+
+**Path Parameters:**
+- `appointmentId`: ID of the appointment
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "patientId": 2,
+  "doctorId": 1,
+  "slotId": 1,
+  "appointmentDate": "2025-09-10",
+  "startTime": "09:00:00",
+  "endTime": "09:30:00",
+  "status": "SCHEDULED",
+  "patientNotes": "Regular checkup",
+  "doctorNotes": null,
+  "createdAt": "2025-09-07T12:00:00",
+  "updatedAt": "2025-09-07T12:00:00"
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "error": "Appointment not found"
+}
+```
+
+### 8. Cancel Appointment
+**Endpoint:** `PUT /api/appointments/{appointmentId}/cancel`  
+**Access:** PATIENT, DOCTOR  
+**Authentication:** Required  
+**Description:** Cancel an existing appointment
+
+**Path Parameters:**
+- `appointmentId`: ID of the appointment to cancel
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "patientId": 2,
+  "doctorId": 1,
+  "slotId": 1,
+  "appointmentDate": "2025-09-10",
+  "startTime": "09:00:00",
+  "endTime": "09:30:00",
+  "status": "CANCELLED",
+  "patientNotes": "Regular checkup",
+  "doctorNotes": null,
+  "createdAt": "2025-09-07T12:00:00",
+  "updatedAt": "2025-09-07T12:30:00"
+}
+```
+
 ---
 
 ## 🧪 System Health APIs
@@ -507,6 +613,16 @@ Patient Appointment System is running successfully!
 **Response (200 OK):**
 ```
 API endpoints are working!
+```
+
+### 10a. Public Health Check
+**Endpoint:** `GET /api/public/health`  
+**Access:** Public  
+**Description:** Public health check endpoint
+
+**Response (200 OK):**
+```
+Public API endpoints are working!
 ```
 
 ---

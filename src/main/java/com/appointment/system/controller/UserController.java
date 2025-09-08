@@ -5,6 +5,7 @@ import com.appointment.system.entity.User;
 import com.appointment.system.repository.UserRepository;
 import com.appointment.system.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -40,7 +41,7 @@ public class UserController {
                     if (role == User.Role.DOCTOR) {
                         users = userRepository.findByRole(User.Role.DOCTOR);
                     } else {
-                        return ResponseEntity.forbidden().build();
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
                     }
                     break;
 
@@ -51,7 +52,7 @@ public class UserController {
                         Set<Long> patientIds = appointmentRepository.findPatientIdsByDoctorId(currentUser.getId());
                         users = userRepository.findByIdInAndRole(patientIds, User.Role.PATIENT);
                     } else {
-                        return ResponseEntity.forbidden().build();
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
                     }
                     break;
 
@@ -61,7 +62,7 @@ public class UserController {
                     break;
 
                 default:
-                    return ResponseEntity.forbidden().build();
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
             List<UserResponse> userResponses = users.stream()
@@ -103,7 +104,7 @@ public class UserController {
                 // Admin can see all patients
                 patients = userRepository.findByRole(User.Role.PATIENT);
             } else {
-                return ResponseEntity.forbidden().build();
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
             List<UserResponse> patientResponses = patients.stream()
