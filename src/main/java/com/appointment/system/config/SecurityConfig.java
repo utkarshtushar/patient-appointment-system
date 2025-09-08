@@ -77,17 +77,20 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // Public endpoints - NO authentication required
                 .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/public/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/test")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/debug/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/api/appointments/slots/available")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/appointments/slots/available", "GET")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/users", "GET")).hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
+                // Role-based endpoints
                 .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("ADMIN")
                 .requestMatchers(new AntPathRequestMatcher("/api/doctor/**")).hasAnyRole("DOCTOR", "ADMIN")
                 .requestMatchers(new AntPathRequestMatcher("/api/patient/**")).hasAnyRole("PATIENT", "ADMIN")
-                // All appointment endpoints now require authentication
+                // All other appointment endpoints require authentication
                 .requestMatchers(new AntPathRequestMatcher("/api/appointments/**")).hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
                 .anyRequest().authenticated()
             )
