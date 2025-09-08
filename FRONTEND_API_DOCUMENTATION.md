@@ -105,6 +105,73 @@ Authorization: Bearer <jwt_token>
 
 ---
 
+## 👥 User Management APIs
+
+### 11. Get Users by Role
+**Endpoint:** `GET /api/users?role={ROLE}`  
+**Access:** PATIENT, DOCTOR, ADMIN  
+**Authentication:** Required  
+**Description:** Get filtered list of users by role
+
+**Query Parameters:**
+- `role` (required): User role (DOCTOR, PATIENT, ADMIN)
+
+**Example Requests:**
+```bash
+# Get all doctors
+GET /api/users?role=DOCTOR
+
+# Get all patients
+GET /api/users?role=PATIENT
+
+# Get all admins
+GET /api/users?role=ADMIN
+```
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "firstName": "Dr. John",
+    "lastName": "Doe",
+    "email": "doctor@example.com",
+    "phoneNumber": "+1234567890",
+    "role": "DOCTOR",
+    "specialization": "Cardiology",
+    "licenseNumber": "DOC123456",
+    "createdAt": "2025-09-09T12:00:00"
+  },
+  {
+    "id": 2,
+    "firstName": "Dr. Jane",
+    "lastName": "Smith",
+    "email": "doctor2@example.com",
+    "phoneNumber": "+1234567891",
+    "role": "DOCTOR",
+    "specialization": "General Medicine",
+    "licenseNumber": "DOC789123",
+    "createdAt": "2025-09-09T12:15:00"
+  }
+]
+```
+
+**Error Response (400 Bad Request):**
+```json
+{
+  "error": "Invalid role parameter"
+}
+```
+
+**Error Response (401 Unauthorized):**
+```json
+{
+  "error": "Authentication required"
+}
+```
+
+---
+
 ## 📅 Appointment APIs
 
 ### 3. Get Available Slots
