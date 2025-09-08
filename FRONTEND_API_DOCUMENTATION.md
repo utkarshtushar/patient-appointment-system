@@ -174,7 +174,55 @@ GET /api/users?role=ADMIN
 
 ## 📅 Appointment APIs
 
-### 3. Get Available Slots
+### 3. Get Available Slots (For Patients)
+**Endpoint:** `GET /api/appointments/slots`  
+**Access:** PATIENT only  
+**Authentication:** Required  
+**Description:** Get available appointment slots for a specific doctor
+
+**Query Parameters:**
+- `doctorId` (required): Doctor's ID
+- `startDate` (required): Start date in YYYY-MM-DD format
+- `endDate` (required): End date in YYYY-MM-DD format
+
+**Example Request:**
+```
+GET /api/appointments/slots?doctorId=1&startDate=2025-09-10&endDate=2025-09-15
+```
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "doctor": {
+      "id": 1,
+      "firstName": "Dr. John",
+      "lastName": "Doe",
+      "specialization": "Cardiology"
+    },
+    "slotDateTime": "2025-09-10T09:00:00",
+    "isBooked": false,
+    "isAvailable": true,
+    "createdAt": "2025-09-07T12:00:00"
+  },
+  {
+    "id": 2,
+    "doctor": {
+      "id": 1,
+      "firstName": "Dr. John",
+      "lastName": "Doe",
+      "specialization": "Cardiology"
+    },
+    "slotDateTime": "2025-09-10T09:30:00",
+    "isBooked": false,
+    "isAvailable": true,
+    "createdAt": "2025-09-07T12:00:00"
+  }
+]
+```
+
+### 3a. Get Available Slots (Public - Legacy)
 **Endpoint:** `GET /api/public/slots/available`  
 **Access:** Public  
 **Description:** Get available appointment slots for a doctor
@@ -304,64 +352,136 @@ GET /api/public/slots/available?doctorId=1&startDate=2025-09-10&endDate=2025-09-
 ]
 ```
 
-### 7. Get Specific Appointment
-**Endpoint:** `GET /api/appointments/{appointmentId}`  
-**Access:** PATIENT, DOCTOR, ADMIN  
+### 6a. Get Doctor's Own Slots
+**Endpoint:** `GET /api/appointments/slots/my-slots`  
+**Access:** DOCTOR only  
 **Authentication:** Required  
-**Description:** Get details of a specific appointment
+**Description:** Get all slots (available and booked) for the logged-in doctor
 
-**Path Parameters:**
-- `appointmentId`: ID of the appointment
+**Query Parameters:**
+- `startDate` (required): Start date in YYYY-MM-DD format
+- `endDate` (required): End date in YYYY-MM-DD format
+
+**Example Request:**
+```
+GET /api/appointments/slots/my-slots?startDate=2025-09-10&endDate=2025-09-15
+```
 
 **Response (200 OK):**
 ```json
-{
-  "id": 1,
-  "patientId": 2,
-  "doctorId": 1,
-  "slotId": 1,
-  "appointmentDate": "2025-09-10",
-  "startTime": "09:00:00",
-  "endTime": "09:30:00",
-  "status": "SCHEDULED",
-  "patientNotes": "Regular checkup",
-  "doctorNotes": null,
-  "createdAt": "2025-09-07T12:00:00",
-  "updatedAt": "2025-09-07T12:00:00"
-}
+[
+  {
+    "id": 1,
+    "doctor": {
+      "id": 1,
+      "firstName": "Dr. John",
+      "lastName": "Doe",
+      "specialization": "Cardiology"
+    },
+    "slotDateTime": "2025-09-10T09:00:00",
+    "isBooked": true,
+    "isAvailable": true,
+    "appointment": {
+      "id": 5,
+      "patientId": 2,
+      "status": "SCHEDULED",
+      "patientNotes": "Regular checkup"
+    },
+    "createdAt": "2025-09-07T12:00:00"
+  },
+  {
+    "id": 2,
+    "doctor": {
+      "id": 1,
+      "firstName": "Dr. John",
+      "lastName": "Doe",
+      "specialization": "Cardiology"
+    },
+    "slotDateTime": "2025-09-10T09:30:00",
+    "isBooked": false,
+    "isAvailable": true,
+    "appointment": null,
+    "createdAt": "2025-09-07T12:00:00"
+  }
+]
 ```
 
-**Error Response (404 Not Found):**
-```json
-{
-  "error": "Appointment not found"
-}
-```
-
-### 8. Cancel Appointment
-**Endpoint:** `PUT /api/appointments/{appointmentId}/cancel`  
-**Access:** PATIENT, DOCTOR  
+### 6b. Get Slots by Admin
+**Endpoint:** `GET /api/appointments/slots/admin`  
+**Access:** ADMIN only  
 **Authentication:** Required  
-**Description:** Cancel an existing appointment
+**Description:** Get slots for a specific doctor or patient's appointments
 
-**Path Parameters:**
-- `appointmentId`: ID of the appointment to cancel
+**Query Parameters:**
+- `doctorId` (optional): Doctor's ID to view their slots
+- `patientId` (optional): Patient's ID to view their appointments
+- `startDate` (required): Start date in YYYY-MM-DD format
+- `endDate` (required): End date in YYYY-MM-DD format
 
-**Response (200 OK):**
+**Note:** Either `doctorId` OR `patientId` must be provided, but not both.
+
+**Example Requests:**
+```bash
+# View doctor's slots
+GET /api/appointments/slots/admin?doctorId=1&startDate=2025-09-10&endDate=2025-09-15
+
+# View patient's appointments
+GET /api/appointments/slots/admin?patientId=2&startDate=2025-09-10&endDate=2025-09-15
+```
+
+**Response for Doctor's Slots (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "doctor": {
+      "id": 1,
+      "firstName": "Dr. John",
+      "lastName": "Doe",
+      "specialization": "Cardiology"
+    },
+    "slotDateTime": "2025-09-10T09:00:00",
+    "isBooked": true,
+    "isAvailable": true,
+    "appointment": {
+      "id": 5,
+      "patientId": 2,
+      "status": "SCHEDULED"
+    },
+    "createdAt": "2025-09-07T12:00:00"
+  }
+]
+```
+
+**Response for Patient's Appointments (200 OK):**
+```json
+[
+  {
+    "id": 3,
+    "doctor": {
+      "id": 1,
+      "firstName": "Dr. John",
+      "lastName": "Doe",
+      "specialization": "Cardiology"
+    },
+    "slotDateTime": "2025-09-11T10:00:00",
+    "isBooked": true,
+    "isAvailable": true,
+    "appointment": {
+      "id": 7,
+      "patientId": 2,
+      "status": "SCHEDULED",
+      "patientNotes": "Follow-up visit"
+    },
+    "createdAt": "2025-09-07T12:00:00"
+  }
+]
+```
+
+**Error Response (400 Bad Request):**
 ```json
 {
-  "id": 1,
-  "patientId": 2,
-  "doctorId": 1,
-  "slotId": 1,
-  "appointmentDate": "2025-09-10",
-  "startTime": "09:00:00",
-  "endTime": "09:30:00",
-  "status": "CANCELLED",
-  "patientNotes": "Regular checkup",
-  "doctorNotes": null,
-  "createdAt": "2025-09-07T12:00:00",
-  "updatedAt": "2025-09-07T12:30:00"
+  "error": "Either doctorId or patientId must be provided, but not both"
 }
 ```
 
@@ -548,15 +668,28 @@ apiClient.interceptors.request.use(config => {
 
 ### Patient Flow
 1. Register/Login → Get JWT token
-2. Search for available slots → `GET /api/public/slots/available`
+2. Search for available slots → `GET /api/appointments/slots` (with doctorId)
 3. Book appointment → `POST /api/appointments/book`
 4. View appointments → `GET /api/appointments/patient/my-appointments`
 5. Cancel if needed → `PUT /api/appointments/{id}/cancel`
 
 ### Doctor Flow
 1. Register/Login → Get JWT token
-2. View appointments → `GET /api/appointments/doctor/my-appointments`
-3. View specific appointment details → `GET /api/appointments/{id}`
-4. Cancel if needed → `PUT /api/appointments/{id}/cancel`
+2. View own slots → `GET /api/appointments/slots/my-slots`
+3. View appointments → `GET /api/appointments/doctor/my-appointments`
+4. View specific appointment details → `GET /api/appointments/{id}`
+5. Cancel if needed → `PUT /api/appointments/{id}/cancel`
 
-This documentation provides all the APIs your frontend team needs to build the complete patient appointment system interface.
+### Admin Flow
+1. Register/Login → Get JWT token
+2. View doctor's slots → `GET /api/appointments/slots/admin?doctorId={id}`
+3. View patient's appointments → `GET /api/appointments/slots/admin?patientId={id}`
+4. View specific appointment details → `GET /api/appointments/{id}`
+5. Cancel if needed → `PUT /api/appointments/{id}/cancel`
+
+### Legacy Patient Flow (Backward Compatibility)
+1. Register/Login → Get JWT token
+2. Search for available slots → `GET /api/public/slots/available` (public endpoint)
+3. Book appointment → `POST /api/appointments/book`
+4. View appointments → `GET /api/appointments/patient/my-appointments`
+5. Cancel if needed → `PUT /api/appointments/{id}/cancel`

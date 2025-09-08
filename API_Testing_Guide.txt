@@ -160,15 +160,85 @@ Authorization: Bearer {JWT_TOKEN}  # For authenticated endpoints
       -H "Authorization: Bearer {PATIENT_JWT_TOKEN}"
     ```
 
+### Phase 4a: New Slot Viewing System Testing
+
+17. **Get Available Slots for Patients (Patient Auth Required)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/slots?doctorId=1&startDate=2025-09-10&endDate=2025-09-15" \
+      -H "Authorization: Bearer {PATIENT_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: Array of available appointment slots for the specified doctor
+    Note: Only shows available slots for booking (isBooked=false)
+
+18. **Get Doctor's Own Slots (Doctor Auth Required)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/slots/my-slots?startDate=2025-09-10&endDate=2025-09-15" \
+      -H "Authorization: Bearer {DOCTOR_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: Array of all slots (both available and booked) for the authenticated doctor
+    Note: Shows complete schedule with appointment details if booked
+
+19. **Get Doctor's Slots as Admin (Admin Auth Required)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/slots/admin?doctorId=1&startDate=2025-09-10&endDate=2025-09-15" \
+      -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: Array of all slots for the specified doctor
+    Note: Admin can view any doctor's complete schedule
+
+20. **Get Patient's Appointments as Admin (Admin Auth Required)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/slots/admin?patientId=2&startDate=2025-09-10&endDate=2025-09-15" \
+      -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: Array of appointment slots for the specified patient
+    Note: Admin can view any patient's appointments
+
+21. **Test Admin Endpoint with Both IDs (Should Fail)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/slots/admin?doctorId=1&patientId=2&startDate=2025-09-10&endDate=2025-09-15" \
+      -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: 400 Bad Request (Either doctorId or patientId must be provided, but not both)
+
+22. **Test Admin Endpoint with No IDs (Should Fail)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/slots/admin?startDate=2025-09-10&endDate=2025-09-15" \
+      -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: 400 Bad Request (Either doctorId or patientId must be provided)
+
+23. **Test Patient Access to Doctor Slots (Should Fail)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/slots/my-slots?startDate=2025-09-10&endDate=2025-09-15" \
+      -H "Authorization: Bearer {PATIENT_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: 403 Forbidden (Access denied - patients cannot access doctor-only endpoint)
+
+24. **Test Doctor Access to Admin Slots (Should Fail)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/slots/admin?doctorId=1&startDate=2025-09-10&endDate=2025-09-15" \
+      -H "Authorization: Bearer {DOCTOR_JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: 403 Forbidden (Access denied - doctors cannot access admin-only endpoint)
+
 ### Phase 5: Error Testing
 
-17. **Test Unauthorized Access**
+25. **Test Unauthorized Access**
     ```bash
     curl -X GET "{BASE_URL}/api/appointments/patient/my-appointments"
     ```
     Expected: 401 Unauthorized
 
-18. **Test Invalid Login**
+26. **Test Invalid Login**
     ```bash
     curl -X POST "{BASE_URL}/api/auth/login" \
       -H "Content-Type: application/json" \
@@ -179,7 +249,7 @@ Authorization: Bearer {JWT_TOKEN}  # For authenticated endpoints
     ```
     Expected: 401 Unauthorized
 
-19. **Test Duplicate Registration**
+27. **Test Duplicate Registration**
     ```bash
     curl -X POST "{BASE_URL}/api/auth/register" \
       -H "Content-Type: application/json" \

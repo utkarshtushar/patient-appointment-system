@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -17,6 +18,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     List<User> findByRole(User.Role role);
+    
+    // New method for finding users by IDs and role (for doctor-patient relationships)
+    List<User> findByIdInAndRole(Set<Long> ids, User.Role role);
+    
+    // Count users by role (used in debug endpoints)
+    long countByRole(User.Role role);
 
     @Query("SELECT u FROM User u WHERE u.role = :role AND u.isActive = true")
     List<User> findActiveUsersByRole(@Param("role") User.Role role);

@@ -85,6 +85,9 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/api/test")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/debug/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/users", "GET")).hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/doctors", "GET")).hasAnyRole("PATIENT", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/patients", "GET")).hasAnyRole("DOCTOR", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/admins", "GET")).hasRole("ADMIN")
                 // Role-based endpoints
                 .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("ADMIN")
                 .requestMatchers(new AntPathRequestMatcher("/api/doctor/**")).hasAnyRole("DOCTOR", "ADMIN")

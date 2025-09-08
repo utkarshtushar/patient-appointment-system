@@ -23,6 +23,7 @@ public class PublicController {
             @RequestParam Long doctorId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        // Public endpoint - patients can see available slots of any doctor for booking
         List<AppointmentSlot> slots = slotGenerationService.getAvailableSlots(doctorId, startDate, endDate);
         return ResponseEntity.ok(slots);
     }

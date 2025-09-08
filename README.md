@@ -52,9 +52,17 @@ A comprehensive appointment booking system built with Spring Boot, featuring rea
 - `POST /api/auth/login` - User login
 
 ### Appointments
-- `GET /api/appointments/slots/available` - Get available slots (Public)
-- `POST /api/appointments/book` - Book appointment (Auth required)
-- `GET /api/appointments/patient/my-appointments` - Get user appointments
+- `GET /api/public/slots/available` - Get available slots (Public - Legacy)
+- `GET /api/appointments/slots` - Get available slots for patients (Auth required)
+- `GET /api/appointments/slots/my-slots` - Get doctor's own slots (Doctor auth required)
+- `GET /api/appointments/slots/admin` - Get slots by admin (Admin auth required)
+- `POST /api/appointments/book` - Book appointment (Patient auth required)
+- `GET /api/appointments/patient/my-appointments` - Get patient appointments
+- `GET /api/appointments/doctor/my-appointments` - Get doctor appointments
+- `PUT /api/appointments/{id}/cancel` - Cancel appointment
+
+### User Management
+- `GET /api/users?role={ROLE}` - Get users by role (Auth required)
 
 ### Health & Monitoring
 - `GET /actuator/health` - Application health status
@@ -87,17 +95,95 @@ src/
 
 ## 🔐 Security Features
 
-- JWT-based authentication
-- Role-based access control (PATIENT, DOCTOR, ADMIN)
+- JWT-based authentication with role-based access control
+- **Patient Role**: Can view available slots and book appointments
+- **Doctor Role**: Can view their own complete schedule (available and booked slots)
+- **Admin Role**: Can view any doctor's schedule or any patient's appointments
 - Password encryption with BCrypt
 - CORS configuration
+- Secure endpoint protection
+
+## 🔍 Slot Viewing System
+
+### Role-Based Slot Access
+- **Patients**: View available slots for specific doctors to book appointments
+- **Doctors**: View all their own slots (both available and booked) without needing to specify an ID
+- **Admins**: View any doctor's complete schedule OR any patient's appointments (mutually exclusive)
+
+### API Examples
+```bash
+# Patient viewing available slots for doctor
+curl -X GET "http://localhost:8080/api/appointments/slots?doctorId=1&startDate=2025-09-10&endDate=2025-09-15" \
+  -H "Authorization: Bearer PATIENT_JWT_TOKEN"
+
+# Doctor viewing their own slots
+curl -X GET "http://localhost:8080/api/appointments/slots/my-slots?startDate=2025-09-10&endDate=2025-09-15" \
+  -H "Authorization: Bearer DOCTOR_JWT_TOKEN"
+
+# Admin viewing doctor's slots
+curl -X GET "http://localhost:8080/api/appointments/slots/admin?doctorId=1&startDate=2025-09-10&endDate=2025-09-15" \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
+
+# Admin viewing patient's appointments
+curl -X GET "http://localhost:8080/api/appointments/slots/admin?patientId=2&startDate=2025-09-10&endDate=2025-09-15" \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
+```
 
 ## 📊 Database
 
 - **H2 Database**: File-based storage at `./data/appointment_system`
 - **Features**: Connection pooling, proper indexing, data persistence
+- **Enhanced Queries**: Support for role-based slot viewing and patient appointment tracking
+
+## 🚀 Deployment
+
+### Production Ready Configurations
+- **Render.com**: Optimized for free tier deployment
+- **Heroku**: PostgreSQL integration ready
+- **Docker**: Containerized deployment support
+
+### Environment Profiles
+- `application.properties` - Local development
+- `application-production.properties` - Production deployment
+
+## 📚 Documentation Files
+
+- `README.md` - Project overview and setup guide
+- `FRONTEND_API_DOCUMENTATION.md` - Complete API documentation for frontend developers
+- `API_CURL_COMMANDS.md` - Ready-to-use curl commands for all endpoints
+- `API_Testing_Guide.txt` - Comprehensive testing workflow
+- `PRODUCTION_API_VALIDATION.md` - Production validation checklist
+
+## 🎯 Key Features
+
+### Slot Management System
+- **Multi-role Access**: Different views for patients, doctors, and admins
+- **Real-time Availability**: Live slot status updates
+- **Secure Access**: Role-based permissions with JWT authentication
+- **Date Range Filtering**: Flexible date-based slot queries
+
+### Appointment Workflow
+1. **Patient**: Search available slots → Book appointment → View appointments
+2. **Doctor**: View complete schedule → Manage appointments → Cancel if needed
+3. **Admin**: Monitor all slots and appointments → Manage system-wide data
 
 ## 👨‍💻 Developer
 
 **Utkarsh Tushar**
 - GitHub: [@utkarshtushar](https://github.com/utkarshtushar)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📞 Support
+
+For support, email utkarshtushar@example.com or create an issue in the GitHub repository.

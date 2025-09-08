@@ -87,4 +87,22 @@ public class SlotGenerationService {
         return appointmentSlotRepository.findAvailableSlotsByDoctorAndDateRange(
             doctorId, startDateTime, endDateTime);
     }
+
+    public List<AppointmentSlot> getAllSlotsForDoctor(Long doctorId, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+
+        // Return all slots (both available and booked) for the doctor
+        return appointmentSlotRepository.findAllSlotsByDoctorAndDateRange(
+            doctorId, startDateTime, endDateTime);
+    }
+
+    public List<AppointmentSlot> getPatientSlots(Long patientId, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+
+        // Return all slots that belong to appointments made by the patient
+        return appointmentSlotRepository.findSlotsByPatientAndDateRange(
+            patientId, startDateTime, endDateTime);
+    }
 }

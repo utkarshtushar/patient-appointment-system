@@ -201,7 +201,96 @@ curl -X GET "{BASE_URL}/api/appointments/{appointmentId}" \
   -H "Authorization: Bearer {JWT_TOKEN}"
 ```
 **Path Parameters:**
-- `appointmentId`: ID of the appointment to retrieve
+- `appointmentId`: ID of the appointment to view
+
+---
+
+## 🔍 Slot Viewing APIs (`/api/appointments/slots`)
+
+### 13. Get Available Slots for Patients (Patient Auth Required)
+```bash
+curl -X GET "{BASE_URL}/api/appointments/slots?doctorId=1&startDate=2025-09-10&endDate=2025-09-15" \
+  -H "Authorization: Bearer {PATIENT_JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+**Query Parameters:**
+- `doctorId` (required): ID of the doctor
+- `startDate` (required): Start date (YYYY-MM-DD format)
+- `endDate` (required): End date (YYYY-MM-DD format)
+
+**Response**: Array of available appointment slots for booking
+```json
+{
+  "id": 1,
+  "doctor": {
+    "id": 1,
+    "firstName": "Dr. John",
+    "lastName": "Doe",
+    "specialization": "Cardiology"
+  },
+  "slotDateTime": "2025-09-10T09:00:00",
+  "isBooked": false,
+  "isAvailable": true,
+  "createdAt": "2025-09-07T12:00:00"
+}
+```
+
+### 14. Get Doctor's Own Slots (Doctor Auth Required)
+```bash
+curl -X GET "{BASE_URL}/api/appointments/slots/my-slots?startDate=2025-09-10&endDate=2025-09-15" \
+  -H "Authorization: Bearer {DOCTOR_JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+**Query Parameters:**
+- `startDate` (required): Start date (YYYY-MM-DD format)
+- `endDate` (required): End date (YYYY-MM-DD format)
+
+**Response**: All slots (available and booked) for the authenticated doctor
+```json
+{
+  "id": 1,
+  "doctor": {
+    "id": 1,
+    "firstName": "Dr. John",
+    "lastName": "Doe",
+    "specialization": "Cardiology"
+  },
+  "slotDateTime": "2025-09-10T09:00:00",
+  "isBooked": true,
+  "isAvailable": true,
+  "appointment": {
+    "id": 5,
+    "patientId": 2,
+    "status": "SCHEDULED",
+    "patientNotes": "Regular checkup"
+  },
+  "createdAt": "2025-09-07T12:00:00"
+}
+```
+
+### 15. Get Doctor's Slots as Admin (Admin Auth Required)
+```bash
+curl -X GET "{BASE_URL}/api/appointments/slots/admin?doctorId=1&startDate=2025-09-10&endDate=2025-09-15" \
+  -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+**Query Parameters:**
+- `doctorId` (required): ID of the doctor to view
+- `startDate` (required): Start date (YYYY-MM-DD format)
+- `endDate` (required): End date (YYYY-MM-DD format)
+
+### 16. Get Patient's Appointments as Admin (Admin Auth Required)
+```bash
+curl -X GET "{BASE_URL}/api/appointments/slots/admin?patientId=2&startDate=2025-09-10&endDate=2025-09-15" \
+  -H "Authorization: Bearer {ADMIN_JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+**Query Parameters:**
+- `patientId` (required): ID of the patient to view
+- `startDate` (required): Start date (YYYY-MM-DD format)
+- `endDate` (required): End date (YYYY-MM-DD format)
+
+**Note**: For admin endpoints, either `doctorId` OR `patientId` must be provided, but not both.
 
 ---
 
@@ -245,6 +334,10 @@ curl -X GET "{BASE_URL}/actuator/metrics"
 | 12 | GET | `/actuator/info` | No | Public | Application info |
 | 13 | GET | `/actuator/metrics` | No | Public | Application metrics |
 | 14 | GET | `/api/users` | Yes | PATIENT/DOCTOR/ADMIN | Get users by role |
+| 15 | GET | `/api/appointments/slots` | Yes | PATIENT | Get available slots for patient |
+| 16 | GET | `/api/appointments/slots/my-slots` | Yes | DOCTOR | Get doctor's own slots |
+| 17 | GET | `/api/appointments/slots/admin` | Yes | ADMIN | Get doctor's slots as admin |
+| 18 | GET | `/api/appointments/slots/admin` | Yes | ADMIN | Get patient's appointments as admin |
 
 ---
 

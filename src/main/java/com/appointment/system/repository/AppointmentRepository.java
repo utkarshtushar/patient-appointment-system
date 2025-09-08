@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -49,4 +50,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.doctor.id = :doctorId AND a.status = 'CONFIRMED'")
     long countConfirmedAppointmentsByDoctor(@Param("doctorId") Long doctorId);
+
+    // Count appointments by status (used in debug endpoints)
+    long countByStatus(Appointment.AppointmentStatus status);
+
+    // New method to find patient IDs who have appointments with a specific doctor
+    @Query("SELECT DISTINCT a.patient.id FROM Appointment a WHERE a.doctor.id = :doctorId")
+    Set<Long> findPatientIdsByDoctorId(@Param("doctorId") Long doctorId);
 }

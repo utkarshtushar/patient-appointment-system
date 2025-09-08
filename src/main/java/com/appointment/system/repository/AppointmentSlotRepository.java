@@ -45,4 +45,16 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
     
     @Query("SELECT COUNT(as) FROM AppointmentSlot as WHERE as.doctor.id = :doctorId AND as.isBooked = true")
     long countBookedSlotsByDoctor(@Param("doctorId") Long doctorId);
+
+    @Query("SELECT as FROM AppointmentSlot as WHERE as.doctor.id = :doctorId AND as.slotDateTime BETWEEN :startDate AND :endDate ORDER BY as.slotDateTime")
+    List<AppointmentSlot> findAllSlotsByDoctorAndDateRange(
+        @Param("doctorId") Long doctorId,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT as FROM AppointmentSlot as JOIN as.appointment a WHERE a.patient.id = :patientId AND as.slotDateTime BETWEEN :startDate AND :endDate ORDER BY as.slotDateTime")
+    List<AppointmentSlot> findSlotsByPatientAndDateRange(
+        @Param("patientId") Long patientId,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate);
 }
