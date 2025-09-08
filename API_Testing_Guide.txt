@@ -94,15 +94,44 @@ Authorization: Bearer {JWT_TOKEN}  # For authenticated endpoints
      }'
    ```
 
-### Phase 3: Appointment System Testing
+### Phase 3: User Management Testing
 
-8. **Get Available Slots (Public)**
+8. **Get Users by Role (Requires Authentication)**
+
+9. **Get All Doctors**
    ```bash
-   curl -X GET "{BASE_URL}/api/appointments/slots/available?doctorId=2&startDate=2025-09-08&endDate=2025-09-15" \
+   curl -X GET "{BASE_URL}/api/users?role=DOCTOR" \
+     -H "Authorization: Bearer {JWT_TOKEN}" \
      -H "Content-Type: application/json"
    ```
+   Expected: Array of doctor user objects with specialization and licenseNumber
 
-9. **Book Appointment (Patient Auth Required)**
+10. **Get All Patients**
+    ```bash
+    curl -X GET "{BASE_URL}/api/users?role=PATIENT" \
+      -H "Authorization: Bearer {JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: Array of patient user objects
+
+11. **Get All Admins**
+    ```bash
+    curl -X GET "{BASE_URL}/api/users?role=ADMIN" \
+      -H "Authorization: Bearer {JWT_TOKEN}" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: Array of admin user objects
+
+### Phase 4: Appointment System Testing
+
+12. **Get Available Slots (PUBLIC - No Authentication Required)**
+    ```bash
+    curl -X GET "{BASE_URL}/api/appointments/slots/available?doctorId=1&startDate=2025-09-10&endDate=2025-09-15" \
+      -H "Content-Type: application/json"
+    ```
+    Expected: Array of available appointment slots
+
+13. **Book Appointment (Patient Auth Required)**
    ```bash
    curl -X POST "{BASE_URL}/api/appointments/book" \
      -H "Content-Type: application/json" \
@@ -113,33 +142,33 @@ Authorization: Bearer {JWT_TOKEN}  # For authenticated endpoints
      }'
    ```
 
-10. **Get Patient Appointments**
+14. **Get Patient Appointments**
     ```bash
     curl -X GET "{BASE_URL}/api/appointments/patient/my-appointments" \
       -H "Authorization: Bearer {PATIENT_JWT_TOKEN}"
     ```
 
-11. **Get Doctor Appointments**
+15. **Get Doctor Appointments**
     ```bash
     curl -X GET "{BASE_URL}/api/appointments/doctor/my-appointments" \
       -H "Authorization: Bearer {DOCTOR_JWT_TOKEN}"
     ```
 
-12. **Cancel Appointment**
+16. **Cancel Appointment**
     ```bash
     curl -X PUT "{BASE_URL}/api/appointments/{appointmentId}/cancel" \
       -H "Authorization: Bearer {PATIENT_JWT_TOKEN}"
     ```
 
-### Phase 4: Error Testing
+### Phase 5: Error Testing
 
-13. **Test Unauthorized Access**
+17. **Test Unauthorized Access**
     ```bash
     curl -X GET "{BASE_URL}/api/appointments/patient/my-appointments"
     ```
     Expected: 401 Unauthorized
 
-14. **Test Invalid Login**
+18. **Test Invalid Login**
     ```bash
     curl -X POST "{BASE_URL}/api/auth/login" \
       -H "Content-Type: application/json" \
@@ -150,7 +179,7 @@ Authorization: Bearer {JWT_TOKEN}  # For authenticated endpoints
     ```
     Expected: 401 Unauthorized
 
-15. **Test Duplicate Registration**
+19. **Test Duplicate Registration**
     ```bash
     curl -X POST "{BASE_URL}/api/auth/register" \
       -H "Content-Type: application/json" \

@@ -31,7 +31,7 @@ curl -X GET "{BASE_URL}/api/test"
 
 ---
 
-## ��� Authentication APIs (`/api/auth`)
+## 🔐 Authentication APIs (`/api/auth`)
 
 ### 3. User Registration (Patient)
 ```bash
@@ -101,6 +101,53 @@ curl -X POST "{BASE_URL}/api/auth/login" \
     "role": "PATIENT"
   }
 }
+```
+
+---
+
+## 👥 User Management APIs (`/api/users`)
+
+### Get Users by Role
+**Endpoint**: `GET /api/users?role={ROLE}`  
+**Authentication**: Required (All roles: PATIENT, DOCTOR, ADMIN)  
+**Description**: Get filtered list of users by role
+
+#### Get All Doctors
+```bash
+curl -X GET "{BASE_URL}/api/users?role=DOCTOR" \
+  -H "Authorization: Bearer {JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+
+#### Get All Patients
+```bash
+curl -X GET "{BASE_URL}/api/users?role=PATIENT" \
+  -H "Authorization: Bearer {JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+
+#### Get All Admins
+```bash
+curl -X GET "{BASE_URL}/api/users?role=ADMIN" \
+  -H "Authorization: Bearer {JWT_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+
+**Sample Response**:
+```json
+[
+  {
+    "id": 1,
+    "firstName": "Dr. John",
+    "lastName": "Doe",
+    "email": "doctor@example.com",
+    "phoneNumber": "+1234567890",
+    "role": "DOCTOR",
+    "specialization": "Cardiology",
+    "licenseNumber": "DOC123456",
+    "createdAt": "2025-09-09T12:00:00"
+  }
+]
 ```
 
 ---
@@ -197,6 +244,7 @@ curl -X GET "{BASE_URL}/actuator/metrics"
 | 11 | GET | `/actuator/health` | No | Public | Health check |
 | 12 | GET | `/actuator/info` | No | Public | Application info |
 | 13 | GET | `/actuator/metrics` | No | Public | Application metrics |
+| 14 | GET | `/api/users` | Yes | PATIENT/DOCTOR/ADMIN | Get users by role |
 
 ---
 
@@ -443,5 +491,3 @@ git push render main
 # Open your live application
 render open utkarsh-appointment-system
 ```
-
-

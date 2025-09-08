@@ -300,24 +300,73 @@ curl -X GET "https://appointment-system-utkarsh.onrender.com/api/users/1" \
   -H "Authorization: Bearer ADMIN_JWT_TOKEN"
 ```
 
+### 30. Get Users by Role
+**Endpoint:** `GET /api/users?role={ROLE}`  
+**Access:** PATIENT, DOCTOR, ADMIN  
+**Authentication:** Required  
+**Description:** Get filtered list of users by role
+
+**Query Parameters:**
+- `role` (required): User role (DOCTOR, PATIENT, ADMIN)
+
+**Example Requests:**
+```bash
+# Get all doctors
+curl "https://appointment-system-utkarsh.onrender.com/api/users?role=DOCTOR" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+
+# Get all patients
+curl "https://appointment-system-utkarsh.onrender.com/api/users?role=PATIENT" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+
+# Get all admins
+curl "https://appointment-system-utkarsh.onrender.com/api/users?role=ADMIN" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "firstName": "Dr. John",
+  "lastName": "Doe",
+  "email": "doctor@example.com",
+  "phoneNumber": "+1234567890",
+  "role": "DOCTOR",
+  "specialization": "Cardiology",
+  "licenseNumber": "DOC123456",
+  "createdAt": "2025-09-09T12:00:00"
+}
+```
+
+**Error Response (400 Bad Request):**
+```json
+{
+  "error": "Invalid role parameter"
+}
+```
+
 ---
 
 ## 🧪 Phase 7: Security & Error Handling Tests
 
-### 30. Test Unauthorized Access (Should Fail)
+### 31. Test Unauthorized Access (Should Fail)
 ```bash
 curl -X GET "https://appointment-system-utkarsh.onrender.com/api/appointments/patient/my-appointments"
 ```
 **Expected**: 401 Unauthorized response
 
-### 31. Test Invalid JWT Token (Should Fail)
+### 32. Test Invalid JWT Token (Should Fail)
 ```bash
 curl -X GET "https://appointment-system-utkarsh.onrender.com/api/appointments/patient/my-appointments" \
   -H "Authorization: Bearer invalid_token_here"
 ```
 **Expected**: 401 Unauthorized response
 
-### 32. Test Invalid Login Credentials (Should Fail)
+### 33. Test Invalid Login Credentials (Should Fail)
 ```bash
 curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/login" \
   -H "Content-Type: application/json" \
@@ -328,7 +377,7 @@ curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/login" \
 ```
 **Expected**: 401 Unauthorized response
 
-### 33. Test Duplicate Registration (Should Fail)
+### 34. Test Duplicate Registration (Should Fail)
 ```bash
 curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register" \
   -H "Content-Type: application/json" \
@@ -343,14 +392,14 @@ curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register"
 ```
 **Expected**: 400 Bad Request (Email already exists)
 
-### 34. Test Role-Based Access Control (Patient accessing Admin endpoint)
+### 35. Test Role-Based Access Control (Patient accessing Admin endpoint)
 ```bash
 curl -X GET "https://appointment-system-utkarsh.onrender.com/api/users" \
   -H "Authorization: Bearer PATIENT_JWT_TOKEN"
 ```
 **Expected**: 403 Forbidden
 
-### 35. Test Booking with Invalid Slot ID (Should Fail)
+### 36. Test Booking with Invalid Slot ID (Should Fail)
 ```bash
 curl -X POST "https://appointment-system-utkarsh.onrender.com/api/appointments/book" \
   -H "Content-Type: application/json" \
