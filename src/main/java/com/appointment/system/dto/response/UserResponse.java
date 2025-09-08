@@ -11,7 +11,8 @@ public class UserResponse {
     private String phoneNumber;
     private User.Role role;
     private String specialization;
-    
+    private String licenseNumber;
+
     public UserResponse() {}
     
     public UserResponse(User user) {
@@ -22,6 +23,7 @@ public class UserResponse {
         this.phoneNumber = user.getPhoneNumber();
         this.role = user.getRole();
         this.specialization = user.getSpecialization();
+        this.licenseNumber = user.getLicenseNumber();
     }
     
     // Getters and Setters
@@ -45,4 +47,7 @@ public class UserResponse {
     
     public String getSpecialization() { return specialization; }
     public void setSpecialization(String specialization) { this.specialization = specialization; }
+
+    public String getLicenseNumber() { return licenseNumber; }
+    public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
 }
