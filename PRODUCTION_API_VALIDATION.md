@@ -48,15 +48,29 @@ curl -X GET "https://appointment-system-utkarsh.onrender.com/api/test" \
 ## 🔐 Phase 2: Authentication System Tests
 
 ### 6. Register Patient User
+### 6.1 Register First Patient User
 ```bash
 curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "patient.test@example.com",
-    "password": "SecurePass123!",
-    "firstName": "John",
-    "lastName": "Doe",
-    "phoneNumber": "+1234567890",
+    "email": "kk@patient.com",
+    "password": "Pass@123",
+    "firstName": "Kumar",
+    "lastName": "Krishna",
+    "phoneNumber": "+1238567890",
+    "role": "PATIENT"
+  }'
+```
+###6.2 Register Second Patient User
+```bash
+curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "bt@patient.com",
+    "password": "Pass@123",
+    "firstName": "Bholu",
+    "lastName": "Tiwari",
+    "phoneNumber": "+1238767890",
     "role": "PATIENT"
   }'
 ```
@@ -66,15 +80,15 @@ curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register"
 curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "doctor.test@example.com",
-    "password": "SecurePass123!",
-    "firstName": "Dr. Sarah",
-    "lastName": "Wilson",
+    "email": "sk@doctor.com",
+    "password": "Pass@123",
+    "firstName": "Shekhar",
+    "lastName": "Kumar",
     "phoneNumber": "+1234567891",
     "role": "DOCTOR",
     "specialization": "Cardiology",
-    "licenseNumber": "MD123456789"
-  }'
+    "licenseNumber": "ABCD1234"
+}'
 ```
 
 ### 8. Register Second Doctor User
@@ -82,15 +96,15 @@ curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register"
 curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "doctor2.test@example.com",
-    "password": "SecurePass123!",
-    "firstName": "Dr. Michael",
-    "lastName": "Johnson",
-    "phoneNumber": "+1234567893",
+    "email": "ak@doctor.com",
+    "password": "Pass@123",
+    "firstName": "Abhinandan",
+    "lastName": "Kumar",
+    "phoneNumber": "+1234567898",
     "role": "DOCTOR",
-    "specialization": "General Medicine",
-    "licenseNumber": "MD987654321"
-  }'
+    "specialization": "Gastro",
+    "licenseNumber": "ABCE1234"
+}'
 ```
 
 ### 9. Register Admin User
@@ -98,11 +112,11 @@ curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register"
 curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin.test@example.com",
-    "password": "SecurePass123!",
-    "firstName": "System",
-    "lastName": "Administrator",
-    "phoneNumber": "+1234567892",
+    "email": "uk@admin.com",
+    "password": "Pass@123",
+    "firstName": "Utkarsh",
+    "lastName": "Kumar",
+    "phoneNumber": "+1238747890",
     "role": "ADMIN"
   }'
 ```
@@ -112,8 +126,8 @@ curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/register"
 curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "patient.test@example.com",
-    "password": "SecurePass123!"
+    "email": "kk@patient.com",
+    "password": "Pass@123"
   }'
 ```
 **📝 Note**: Copy the `token` from response for use in subsequent API calls as `PATIENT_JWT_TOKEN`
@@ -123,8 +137,8 @@ curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/login" \
 curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "doctor.test@example.com",
-    "password": "SecurePass123!"
+    "email": "sk@doctor.com",
+    "password": "Pass@123"
   }'
 ```
 **📝 Note**: Copy the `token` from response for use in subsequent API calls as `DOCTOR_JWT_TOKEN`
@@ -134,8 +148,8 @@ curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/login" \
 curl -X POST "https://appointment-system-utkarsh.onrender.com/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin.test@example.com",
-    "password": "SecurePass123!"
+    "email": "uk@admin.com",
+    "password": "Pass@123"
   }'
 ```
 **📝 Note**: Copy the `token` from response for use in subsequent API calls as `ADMIN_JWT_TOKEN`
