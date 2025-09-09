@@ -1,5 +1,6 @@
 package com.appointment.system.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -38,6 +39,7 @@ public class User implements UserDetails {
     @NotBlank
     @Size(min = 8)
     @Column(nullable = false)
+    @JsonIgnore  // Hide password from JSON serialization
     private String password;
     
     @Column(name = "phone_number")
