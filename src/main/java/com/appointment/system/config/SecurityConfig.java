@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -77,17 +78,18 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints - NO authentication required
-                .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
+                // Public endpoints - NO authentication required (Using explicit AntPathRequestMatcher)
                 .requestMatchers(new AntPathRequestMatcher("/api/public/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/test")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/api/debug/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/api/users", "GET")).hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/api/doctors", "GET")).hasAnyRole("PATIENT", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/api/patients", "GET")).hasAnyRole("DOCTOR", "ADMIN")
-                .requestMatchers(new AntPathRequestMatcher("/api/admins", "GET")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/actuator/**")).permitAll()
+                // Specific user endpoints with role restrictions
+                .requestMatchers(new AntPathRequestMatcher("/api/users", GET.name())).hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/doctors", GET.name())).hasAnyRole("PATIENT", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/patients", GET.name())).hasAnyRole("DOCTOR", "ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/admins", GET.name())).hasRole("ADMIN")
                 // Role-based endpoints
                 .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("ADMIN")
                 .requestMatchers(new AntPathRequestMatcher("/api/doctor/**")).hasAnyRole("DOCTOR", "ADMIN")
@@ -98,7 +100,7 @@ public class SecurityConfig {
             )
             .headers(headers -> headers
                 .frameOptions(frameOptions -> frameOptions.sameOrigin())
-            ) // For H2 console - uses modern Spring Security syntax
+            )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
