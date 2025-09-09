@@ -27,23 +27,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+
+        // Skip JWT filter for public endpoints
+        return path.startsWith("/api/public/") ||
+               path.startsWith("/api/auth/") ||
+               path.equals("/") ||
+               path.equals("/api/test") ||
+               path.startsWith("/h2-console/") ||
+               path.startsWith("/actuator/");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                   FilterChain filterChain) throws ServletException, IOException {
 
         String token = getTokenFromRequest(request);
 
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String username = tokenProvider.getUsernameFromToken(token);
+            try {
+                String username = tokenProvider.getUsernameFromToken(token);
 
-            if (username != null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (username != null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                if (tokenProvider.validateToken(token, userDetails)) {
-                    UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    if (tokenProvider.validateToken(token, userDetails)) {
+                        UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
                 }
+            } catch (Exception e) {
+                // Log the error but don't break the filter chain
+                logger.error("JWT Authentication failed: " + e.getMessage());
             }
         }
 
