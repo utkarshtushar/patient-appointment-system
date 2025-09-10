@@ -94,8 +94,8 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("ADMIN")
                 .requestMatchers(new AntPathRequestMatcher("/api/doctor/**")).hasAnyRole("DOCTOR", "ADMIN")
                 .requestMatchers(new AntPathRequestMatcher("/api/patient/**")).hasAnyRole("PATIENT", "ADMIN")
-                // All appointment endpoints require authentication
-                .requestMatchers(new AntPathRequestMatcher("/api/appointments/**")).hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
+                // All appointment endpoints require authentication but roles are handled by @PreAuthorize
+                .requestMatchers(new AntPathRequestMatcher("/api/appointments/**")).authenticated()
                 .anyRequest().authenticated()
             )
             .headers(headers -> headers
