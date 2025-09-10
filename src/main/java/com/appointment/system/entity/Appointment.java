@@ -23,7 +23,7 @@ public class Appointment {
     @NotNull
     private User doctor;
     
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "appointment_slot_id", nullable = false)
     @NotNull
     private AppointmentSlot appointmentSlot;

@@ -123,9 +123,10 @@ public class AppointmentService {
 
         appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
 
-        // Free up the slot
+        // Free up the slot - ensure both flags are set correctly
         AppointmentSlot slot = appointment.getAppointmentSlot();
         slot.setIsBooked(false);
+        slot.setIsAvailable(true);  // Explicitly set to available
         appointmentSlotRepository.save(slot);
 
         return appointmentRepository.save(appointment);
