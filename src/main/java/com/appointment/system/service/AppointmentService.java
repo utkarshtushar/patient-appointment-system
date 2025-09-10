@@ -5,6 +5,7 @@ import com.appointment.system.entity.AppointmentSlot;
 import com.appointment.system.entity.User;
 import com.appointment.system.repository.AppointmentRepository;
 import com.appointment.system.repository.AppointmentSlotRepository;
+import com.appointment.system.repository.UserRepository;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class AppointmentService {
 
     @Autowired
     private AppointmentSlotRepository appointmentSlotRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired(required = false)
     private RedissonClient redissonClient;
@@ -79,14 +83,17 @@ public class AppointmentService {
             throw new RuntimeException("Appointment slot is not available");
         }
 
+        // Load the patient user from database to ensure all fields are populated
+        User patient = userRepository.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
         // Mark slot as booked
         slot.setIsBooked(true);
         appointmentSlotRepository.save(slot);
 
         // Create appointment
         Appointment appointment = new Appointment();
-        appointment.setPatient(new User()); // Set patient ID
-        appointment.getPatient().setId(patientId);
+        appointment.setPatient(patient);  // Set the fully loaded patient object
         appointment.setDoctor(slot.getDoctor());
         appointment.setAppointmentSlot(slot);
         appointment.setAppointmentDateTime(slot.getSlotDateTime());
